@@ -5,6 +5,7 @@ runs/
 # ignore all model and parameter files
 *.pth
 *.pt
+*.mat
 
 # local folders only
 deprecated/
