@@ -1,0 +1,12 @@
+Ninanpro/
+old_runs/
+runs/
+
+# ignore all model and parameter files
+*.pth
+*.pt
+
+# local folders only
+deprecated/
+__pycache__/
+best_models/
