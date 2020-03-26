@@ -7,6 +7,9 @@ runs/
 *.pt
 *.mat
 
+# exceptions
+#!S1_E1_A1.mat
+
 # local folders only
 deprecated/
 __pycache__/
