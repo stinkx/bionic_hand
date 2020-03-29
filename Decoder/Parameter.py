@@ -21,8 +21,8 @@ comment = 'lstm_db8_s3'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
-train = False
-load_input = True
+train = True
+load_input = False
 database = '8'  # [1, 2, 8, Myo]
 subject = 3
 excercise = 'ABC'
@@ -90,7 +90,7 @@ momentum = 0.95
 loss = 'MSELoss'   # [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss] only L1Loss works
 network = 'LSTM'  # [RNN, LSTM, GRU, CNN, SVR]
 
-epochs = 100  # 128 for batch 32  #TODO: 15 epochs is not enough
+epochs = 3  # 128 for batch 32  #TODO: 15 epochs is not enough
 sequence = 1  # this has probably effect on the delay!
 
 hidden_size = 128  # regularizes a little bit
