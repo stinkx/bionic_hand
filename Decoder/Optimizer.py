@@ -3,6 +3,9 @@ import torch
 
 # implement learning rate decay too!
 def get_optimizer(optimizer_name, parameters, learning_rate, weight_decay, momentum):
+    if learning_rate < 0:
+        raise ValueError("Learning rate cannot be negative.")
+
     if optimizer_name == 'SGD':
         optimizer = torch.optim.SGD(parameters, lr=learning_rate, weight_decay=weight_decay, momentum=momentum)
     elif optimizer_name == 'Adam':

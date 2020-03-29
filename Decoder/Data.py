@@ -114,7 +114,7 @@ def process_data():
         else:
             feature_set = torch.cat((feature_set, window.float().to(Parameter.device).transpose_(0, 1).unsqueeze(0)), 0)
 
-        print('Generating Feature Set [ ', i + 1, ' / ', int((emg.shape[0] - time_frame) / time_progress), ' ]', flush=True, end='\r')
+        print('Generating Feature Set [ ', i + 1, ' / ', int((emg.shape[0] - time_frame) / time_progress), ' ]', flush=True)
 
     emg.cpu()
 

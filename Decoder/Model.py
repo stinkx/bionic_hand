@@ -3,6 +3,25 @@ import torch
 
 
 def get_model(model_name, input_size, output_size, hidden_size, batch_size, num_layers, dropout, bias):
+    if type(model_name) is not str or model_name not in ["RNN", "LSTM", "GRU", "GBRT", "CNN", "CRNN"]:
+        raise ValueError("Model name must be a string and match one of the implemented networks.")
+    if type(input_size) is not int or input_size < 0:
+        raise ValueError("Input size must be of type int and positive.")
+    if type(output_size) is not int or output_size < 0:
+        raise ValueError("Output size must be of type int and positive.")
+    if type(hidden_size) is not int or hidden_size < 0:
+        raise ValueError("Hidden size must be of type int and positive.")
+    if type(batch_size) is not int or batch_size < 0:
+        raise ValueError("Batch size must be of type int and positive.")
+    if type(num_layers) is not int or num_layers < 0:
+        raise ValueError("Number of layers must be of type int and positive.")
+    if num_layers > 10:
+        raise ValueError("Number of layers is unreasonably high.")
+    if type(dropout) is not float or dropout < 0 or dropout >= 1:
+        raise ValueError("Dropout must be of type float and between 0 and 1.")
+    if type(bias) is not bool:
+        raise  ValueError("Bias must be of type boolean.")
+
     # check for Cuda device
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
