@@ -21,9 +21,9 @@ comment = 'lstm_db8_s3'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
-train = True
-load_input = False
-database = '8'  # [1, 2, 8, Myo]
+train = False
+load_input = True
+database = '7'  # [1, 2, 7, 8, Myo]
 subject = 3
 excercise = 'ABC'
 
@@ -60,6 +60,9 @@ if database == '1':
 elif database == '2':
     dataset = ['../Ninapro/Dataset_2/DB2_s' + str(subject) + '/S' + str(subject) + '_E2_A1.mat',
                '../Ninapro/Dataset_2/DB2_s' + str(subject) + '/S' + str(subject) + '_E1_A1.mat']
+elif database == '7':
+    dataset = ['../Ninapro/Dataset_7/Subject_' + str(subject) + '/S' + str(subject) + '_E2_A1.mat',
+               '../Ninapro/Dataset_7/Subject_' + str(subject) + '/S' + str(subject) + '_E1_A1.mat']
 elif database == '8':
     dataset = ['../Ninapro/Dataset_8/S' + str(subject) + '_E1_A1.mat',
                '../Ninapro/Dataset_8/S' + str(subject) + '_E1_A2.mat',

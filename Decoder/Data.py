@@ -3,11 +3,8 @@ import scipy.io as scio
 from scipy import signal
 from Features import calc_features
 from sklearn.preprocessing import StandardScaler
-
 import Parameter
-
-import matplotlib.pyplot as plt
-# input_size, mean, std
+import time
 
 
 def process_data():
@@ -39,10 +36,7 @@ def process_data():
             emg_data = signal.sosfilt(sos, emg_data)
         if Parameter.notch is True:
             b, a = signal.iirnotch(50., 30., Parameter.emg_frequency)
-            #freq, h = signal.freqz(b, a, fs=emg_frequency)
             emg_data = signal.lfilter(b, a, emg_data)
-            #plt.plot(freq, h, color='blue')
-            #plt.show()
 
         emg = torch.cat((emg, torch.from_numpy(emg_data).float()), 0)
         glove = torch.cat((glove, torch.from_numpy(dataset['glove']).float()), 0)
@@ -59,30 +53,18 @@ def process_data():
 
     emg = emg[emd::, :].double().to(Parameter.device)
     glove = glove[time_frame::time_progress, :].to(Parameter.device)  # TODO: evaluate this
-    #if Parameter.acc is True:
-    #    acc = acc.to(Parameter.device)
-    #if Parameter.im is True:
-        #acc = acc.to(Parameter.device)
-        #mag = mag.to(Parameter.device)
-        #gyro = gyro.to(Parameter.device)
 
     if Parameter.split_dataset is True:
         movement = movement[time_frame::time_progress, :].to(Parameter.device)
         repetition = repetition[time_frame::time_progress, :].to(Parameter.device)
 
-    #TODO: use repetition 5 for validation and 6 for testing
-
     if Parameter.normalize_in is True:  # mean 0 std 1
-        #emg = emg / torch.max(emg)
-        #emg = emg * 300.
         Parameter.parameter['mean_in'] = torch.mean(emg)
         Parameter.parameter['std_in'] = torch.std(emg)
         scaler.fit(emg.cpu())
         emg = torch.from_numpy(scaler.transform(emg.cpu())).float().to(Parameter.device)
 
     if Parameter.normalize_gt is True:
-        #glove = glove + 100.
-        #glove = (glove + 1000.) / 200.
         Parameter.parameter['mean_gt'] = torch.mean(glove)
         Parameter.parameter['std_gt'] = torch.std(glove)
         scaler.fit(glove.cpu())
@@ -90,6 +72,7 @@ def process_data():
 
     ####################################################################################################################
     # calculate feature set
+    start = time.perf_counter()
     feature_set = torch.Tensor().to(Parameter.device)
 
     for i in range(int((emg.shape[0] - time_frame) / time_progress)):
@@ -168,7 +151,6 @@ def process_data():
 
         training_set.ground_truth = training_set.ground_truth.unsqueeze(1)
         validation_set.ground_truth = validation_set.ground_truth.unsqueeze(1)
-        #testing_set.ground_truth = testing_set.ground_truth.unsqueeze(1)
 
     else:
         # calc indexes for dataset split
@@ -191,11 +173,6 @@ def process_data():
             training_set.input = feature_set[:border_idx:, :].to(Parameter.device)
             validation_set.input = feature_set[border_idx:border_idx_valid:, :].to(Parameter.device)
             testing_set.input = feature_set[border_idx_valid:border_idx_test:, :].to(Parameter.device)
-
-        #if normalize_gt is True:  # TODO: also implement normalization as for input data
-        #    training_set.ground_truth = torch.sigmoid(training_set.ground_truth / 170.).to(device)
-        #    validation_set.ground_truth = torch.sigmoid(validation_set.ground_truth / 170.).to(device)
-        #    testing_set.ground_truth = torch.sigmoid(testing_set.ground_truth / 170.).to(device)
 
         if Parameter.derivative_gt is True:  # validated
             training_set.ground_truth = training_set.ground_truth[1:, :] - training_set.ground_truth[:-1, :]
@@ -226,6 +203,7 @@ def process_data():
         validation_set.ground_truth = validation_set.ground_truth[:(validation_set.ground_truth.shape[0] - (validation_set.ground_truth.shape[0] % Parameter.batch_size))]  # prepare for reshape
         validation_set.ground_truth = validation_set.ground_truth.view(-1, Parameter.batch_size, validation_set.ground_truth.shape[1])  # reshape
 
-    print('Preprocessing finished.')
+    finish = time.perf_counter()
+    print(f'Preprocessing finished in {round(finish-start, 2)} seconds.')
 
     return training_set, validation_set, testing_set

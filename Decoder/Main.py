@@ -68,7 +68,8 @@ else:
     output_size = training_set.ground_truth.shape[2]
 
 Parameter.parameter['input_size'] = input_size
-torch.save(Parameter.parameter, './model/' + Parameter.comment + '.pt')  # TODO: change this path (for online prediction)
+os.makedirs(save_dir, exist_ok=True)
+torch.save(Parameter.parameter, model_save_dir + '/' + str(Parameter.network) + '_' + Parameter.comment + '.pt')  # TODO: change this path (for online prediction)
 
 
 if Parameter.network == "SVR":
@@ -316,6 +317,7 @@ def test():
 
     print('Testing finished.')
 
+    os.makedirs('./scores/DB_' + str(Parameter.database), exist_ok=True)
     file_scores = open('./scores/DB_' + str(Parameter.database) + '/S' + str(Parameter.subject) + '.txt', 'a')
 
     if Parameter.one_joint is True:
