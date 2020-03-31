@@ -21,8 +21,8 @@ comment = 'lstm_db8_s3'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
-train = False
-load_input = True
+train = True
+load_input = False
 database = '7'  # [1, 2, 7, 8, Myo]
 subject = 3
 excercise = 'ABC'

@@ -204,6 +204,6 @@ def process_data():
         validation_set.ground_truth = validation_set.ground_truth.view(-1, Parameter.batch_size, validation_set.ground_truth.shape[1])  # reshape
 
     finish = time.perf_counter()
-    print(f'Preprocessing finished in {round(finish-start, 2)} seconds.')
+    print('Preprocessing finished in {} seconds.'.format(round(finish-start, 2)))
 
     return training_set, validation_set, testing_set
