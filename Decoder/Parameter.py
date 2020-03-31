@@ -22,7 +22,7 @@ comment = 'lstm_db8_s3'
 #TODO: regularize with hidden size and even more dropout
 
 train = True
-load_input = False
+load_input = True
 database = '8'  # [1, 2, 8, Myo]
 subject = 3
 excercise = 'ABC'

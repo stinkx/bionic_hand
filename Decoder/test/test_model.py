@@ -2,7 +2,7 @@ import unittest
 from Model import get_model
 
 
-class MyTestCase(unittest.TestCase):
+class ModelTest(unittest.TestCase):
     def test_model_name(self):
         self.assertRaises(ValueError, get_model, 0, 100, 5, 128, 3, 1, 0.5, True)
         self.assertRaises(ValueError, get_model, "RNNN", 100, 5, 128, 3, 1, 0.5, True)

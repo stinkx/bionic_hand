@@ -20,7 +20,7 @@ def get_model(model_name, input_size, output_size, hidden_size, batch_size, num_
     if type(dropout) is not float or dropout < 0 or dropout >= 1:
         raise ValueError("Dropout must be of type float and between 0 and 1.")
     if type(bias) is not bool:
-        raise  ValueError("Bias must be of type boolean.")
+        raise ValueError("Bias must be of type boolean.")
 
     # check for Cuda device
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
