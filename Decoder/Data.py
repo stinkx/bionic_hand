@@ -25,7 +25,7 @@ def process_data():
     gyro = torch.Tensor()
 
     movement = torch.Tensor()
-    repetiton = torch.Tensor()
+    repetition = torch.Tensor()
 
     # combine all datasets to one
     for dataset_name in Parameter.dataset:
@@ -55,7 +55,7 @@ def process_data():
 
         if Parameter.split_dataset is True:
             movement = torch.cat((movement, torch.from_numpy(dataset['restimulus']).float()), 0)
-            repetiton = torch.cat((repetiton, torch.from_numpy(dataset['rerepetition']).float()), 0)
+            repetition = torch.cat((repetition, torch.from_numpy(dataset['rerepetition']).float()), 0)
 
     emg = emg[emd::, :].double().to(Parameter.device)
     glove = glove[time_frame::time_progress, :].to(Parameter.device)  # TODO: evaluate this
@@ -68,7 +68,7 @@ def process_data():
 
     if Parameter.split_dataset is True:
         movement = movement[time_frame::time_progress, :].to(Parameter.device)
-        repetiton = repetiton[time_frame::time_progress, :].to(Parameter.device)
+        repetition = repetition[time_frame::time_progress, :].to(Parameter.device)
 
     #TODO: use repetition 5 for validation and 6 for testing
 
@@ -114,7 +114,7 @@ def process_data():
         else:
             feature_set = torch.cat((feature_set, window.float().to(Parameter.device).transpose_(0, 1).unsqueeze(0)), 0)
 
-        print('Generating Feature Set [ ', i + 1, ' / ', int((emg.shape[0] - time_frame) / time_progress), ' ]', flush=True)
+        print('Generating Feature Set [ ', i + 1, ' / ', int((emg.shape[0] - time_frame) / time_progress), ' ]', flush=True, end="\r")
 
     emg.cpu()
 
@@ -149,11 +149,11 @@ def process_data():
     testing_set.ground_truth = torch.Tensor().to(Parameter.device)
 
     if Parameter.split_dataset is True:
-        for k in range(repetiton.shape[0] - 1):
-            if repetiton[k, 0] == 5:
+        for k in range(repetition.shape[0] - 1):
+            if repetition[k, 0] == 5:
                 validation_set.input = torch.cat((validation_set.input, feature_set[k].unsqueeze(0)), 0)
                 validation_set.ground_truth = torch.cat((validation_set.ground_truth, glove[k].unsqueeze(0)), 0)
-            elif repetiton[k, 0] == 6:
+            elif repetition[k, 0] == 6:
                 testing_set.input = torch.cat((testing_set.input, feature_set[k].unsqueeze(0)), 0)
                 testing_set.ground_truth = torch.cat((testing_set.ground_truth, glove[k].unsqueeze(0)), 0)
             else:

@@ -22,8 +22,5 @@ def get_optimizer(optimizer_name, parameters, learning_rate, weight_decay, momen
         optimizer = torch.optim.Adadelta(parameters, lr=learning_rate, weight_decay=weight_decay)
     elif optimizer_name == 'RMSprop':
         optimizer = torch.optim.RMSprop(parameters, lr=learning_rate, weight_decay=weight_decay, momentum=momentum)
-    else:
-        optimizer = False
-        print('Invalid Optimizer!')
 
     return optimizer

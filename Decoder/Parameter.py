@@ -22,7 +22,7 @@ comment = 'lstm_db8_s3'
 #TODO: regularize with hidden size and even more dropout
 
 train = True
-load_input = True
+load_input = False
 database = '8'  # [1, 2, 8, Myo]
 subject = 3
 excercise = 'ABC'
@@ -87,7 +87,7 @@ learning_rate = 1e-5  # 5e-4   TODO: 1e-5 brings validation loss down, do learni
 weight_decay = 0.001  # TODO: try different values here was 0.01 before (this is best)
 momentum = 0.95
 
-loss = 'MSELoss'   # [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss] only L1Loss works
+loss = 'MSELoss'   # [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss] MSE works best
 network = 'LSTM'  # [RNN, LSTM, GRU, CNN, SVR]
 
 epochs = 3  # 128 for batch 32  #TODO: 15 epochs is not enough

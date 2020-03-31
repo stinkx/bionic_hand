@@ -281,7 +281,3 @@ def get_model(model_name, input_size, output_size, hidden_size, batch_size, num_
 
         return CRNN()
 
-    else:
-        model = False
-        print('Invalid model!')
-        return model
