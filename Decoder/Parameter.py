@@ -23,9 +23,9 @@ comment = 'lstm_db8_s3'
 
 train = True
 load_input = False
-database = '7'  # [1, 2, 7, 8, Myo]
+database = '8'  # [1, 2, 7, 8, Myo]
 subject = 3
-excercise = 'ABC'
+exercise = 'ABC'
 
 training_size = 0.8  # 0,4  # TODO: try increasing this
 validation_size = 0.1  # 0,4

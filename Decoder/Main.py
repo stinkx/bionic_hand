@@ -35,7 +35,7 @@ import Parameter
 # TODO: go through all the code and validate
 # TODO: check if everything runs on GPU
 
-save_dir = "./feature_set/DB_" + str(Parameter.database) + '/S' + str(Parameter.subject) + '/' + Parameter.excercise + '_' + str(int(Parameter.window)) + '_' + str(int(Parameter.overlap)) + '/'
+save_dir = "./feature_set/DB_" + str(Parameter.database) + '/S' + str(Parameter.subject) + '/' + Parameter.exercise + '_' + str(int(Parameter.window)) + '_' + str(int(Parameter.overlap)) + '/'
 model_save_dir = './model/DB_' + str(Parameter.database) + '/S' + str(Parameter.subject)
 
 if Parameter.load_input is True:
