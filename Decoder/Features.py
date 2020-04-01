@@ -2,10 +2,13 @@ import torch
 from pywt import wavedec
 import numpy as np
 import Parameter
+import concurrent.futures
+import time
 
 
 def calc_features(window, window_acc, window_mag, window_gyro, feature_names, feature_names_im, sample_frequency):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = "cuda:0"
     features = torch.Tensor().to(device)
 
     # pre-calculated factors for some features
@@ -15,23 +18,36 @@ def calc_features(window, window_acc, window_mag, window_gyro, feature_names, fe
     w1[:round(window.shape[0] / 4.), :] = 0.5
     w1[round(window.shape[0] * 0.75):, :] = 0.5
 
+    # start_multi = time.perf_counter()
+    # with concurrent.futures.ThreadPoolExecutor() as executor:
+    #     features_emg = executor.map(calc_feature, [window] * len(feature_names), feature_names, [P] * len(feature_names), [f] * len(feature_names), [w1] * len(feature_names))
+    # end_multi = time.perf_counter()
+
+    #start = time.perf_counter()
     for feature_name in feature_names:
-        features = torch.cat((features, calc_feature(window, feature_name, P, f, w1, device).float()), 1).to(device)
+        features = torch.cat((features, calc_feature(window, feature_name, P, f, w1).to(device).float()), 1).to(device)
+    #end = time.perf_counter()
+
+ #   print(end_multi-start_multi)
+    #print(end-start)
+
+    # for feature_emg in features_emg:
+    #     print(feature_emg)
 
     for feature_name_im in feature_names_im:
         if Parameter.acc is True:
-            features = torch.cat((features, calc_feature(window_acc, feature_name_im, P, f, w1, device).float()), 1).to(device)
+            features = torch.cat((features, calc_feature(window_acc, feature_name_im, P, f, w1, device).float()), 1).cuda()
         if Parameter.mag is True:
-            features = torch.cat((features, calc_feature(window_mag, feature_name_im, P, f, w1, device).float()), 1).to(device)
+            features = torch.cat((features, calc_feature(window_mag, feature_name_im, P, f, w1, device).float()), 1).cuda()
         if Parameter.gyro is True:
-            features = torch.cat((features, calc_feature(window_gyro, feature_name_im, P, f, w1, device).float()), 1).to(device)
+            features = torch.cat((features, calc_feature(window_gyro, feature_name_im, P, f, w1, device).float()), 1).cuda()
 
     features.unsqueeze_(0)  # add additional dimension to concat
 
     return features
 
 
-def calc_feature(window, feature_name, P=0, f=0, w1=0, device=0):
+def calc_feature(window, feature_name, P=0, f=0, w1=0, device="cpu"):
 
     if feature_name == 'mean_value':  # for acc data
         if Parameter.database == '8':
@@ -103,7 +119,7 @@ def calc_feature(window, feature_name, P=0, f=0, w1=0, device=0):
         crossings = torch.sign(window)[1:, :] - torch.sign(window)[:-1, :]
         feature0 = torch.Tensor().to(device)
         for k in range(window.shape[1]):
-            feature0 = torch.cat((feature0, torch.tensor([crossings[:, k].nonzero().shape[0]]).cuda().float()), 0)
+            feature0 = torch.cat((feature0, torch.tensor([crossings[:, k].nonzero().shape[0]]).to(device).float()), 0)
     elif feature_name == 'slope_sign_changes':
         diff = window[1:, :] - window[:-1, :]
         slopes = torch.sign(diff)[1:, :] - torch.sign(diff)[:-1, :]
