@@ -34,6 +34,7 @@ if Parameter.parse_args is True:
         Parameter.database = args.database
 
     if Parameter.database == '1':
+        Parameter.emg_frequency = 2000
         Parameter.acc = False
         Parameter.mag = False
         Parameter.gyro = False
@@ -42,20 +43,24 @@ if Parameter.parse_args is True:
             '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E3.mat',
             '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E2.mat']
     elif Parameter.database == '2':
+        Parameter.emg_frequency = 2000
         Parameter.mag = False
         Parameter.gyro = False
         Parameter.dataset = [
             '../Ninapro/Dataset_2/DB2_s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E2_A1.mat',
             '../Ninapro/Dataset_2/DB2_s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E1_A1.mat']
     elif Parameter.database == '7':
+        Parameter.emg_frequency = 2000
         Parameter.dataset = [
             '../Ninapro/Dataset_7/Subject_' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E2_A1.mat',
             '../Ninapro/Dataset_7/Subject_' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E1_A1.mat']
     elif Parameter.database == '8':
+        Parameter.emg_frequency = 1111
         Parameter.dataset = ['../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A1.mat',
                              '../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A2.mat',
                              '../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A3.mat']
     elif Parameter.database == 'Myo':
+        Parameter.emg_frequency = 50
         Parameter.mag = False
         Parameter.dataset = ['../Ninapro/Myo/S' + str(Parameter.subject) + '_E1.mat',
                              '../Ninapro/Myo/S' + str(Parameter.subject) + '_E2.mat']
@@ -90,9 +95,7 @@ if Parameter.parse_args is True:
 # TODO: go through all the code and validate
 # TODO: check if everything runs on GPU
 
-save_dir = "./feature_set/DB_" + str(Parameter.database) + '/S' + str(
-    Parameter.subject) + '/' + Parameter.exercise + '_' + str(int(Parameter.window)) + '_' + str(
-    int(Parameter.overlap)) + '/'
+save_dir = "./feature_set/DB_" + str(Parameter.database) + '/S' + str(Parameter.subject) + '/'
 model_save_dir = './model/DB_' + str(Parameter.database) + '/S' + str(Parameter.subject)
 
 if Parameter.load_input is True:
@@ -124,7 +127,7 @@ else:
     output_size = training_set.ground_truth.shape[2]
 
 Parameter.parameter['input_size'] = input_size
-os.makedirs(save_dir, exist_ok=True)
+os.makedirs(model_save_dir, exist_ok=True)
 torch.save(Parameter.parameter, model_save_dir + '/' + str(
     Parameter.network) + '_' + Parameter.comment + '.pt')  # TODO: change this path (for online prediction)
 
