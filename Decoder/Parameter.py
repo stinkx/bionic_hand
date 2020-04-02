@@ -21,8 +21,11 @@ comment = 'lstm_db8_s3'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
+parse_args = True
+
+load_input = True
 train = True
-load_input = False
+test = True
 database = '8'  # [1, 2, 7, 8, Myo]
 subject = 3
 exercise = 'ABC'
@@ -51,36 +54,11 @@ calc_feature = True
 acc = True  # needs to be off for db1
 mag = True  # needs to be off for db1 and db2
 gyro = True  # needs to be off for db1 and db2
-split_dataset = True
-
-if database == '1':
-    dataset = ['../Ninapro/Dataset_1/s' + str(subject) + '/S' + str(subject) + '_A1_E1.mat',
-               '../Ninapro/Dataset_1/s' + str(subject) + '/S' + str(subject) + '_A1_E3.mat',
-               '../Ninapro/Dataset_1/s' + str(subject) + '/S' + str(subject) + '_A1_E2.mat']
-elif database == '2':
-    dataset = ['../Ninapro/Dataset_2/DB2_s' + str(subject) + '/S' + str(subject) + '_E2_A1.mat',
-               '../Ninapro/Dataset_2/DB2_s' + str(subject) + '/S' + str(subject) + '_E1_A1.mat']
-elif database == '7':
-    dataset = ['../Ninapro/Dataset_7/Subject_' + str(subject) + '/S' + str(subject) + '_E2_A1.mat',
-               '../Ninapro/Dataset_7/Subject_' + str(subject) + '/S' + str(subject) + '_E1_A1.mat']
-elif database == '8':
-    dataset = ['../Ninapro/Dataset_8/S' + str(subject) + '_E1_A1.mat',
-               '../Ninapro/Dataset_8/S' + str(subject) + '_E1_A2.mat',
-               '../Ninapro/Dataset_8/S' + str(subject) + '_E1_A3.mat']
-elif database == 'Myo':
-    dataset = ['../Ninapro/Myo/S' + str(subject) + '_E1.mat',
-               '../Ninapro/Myo/S' + str(subject) + '_E2.mat']
-else:
-    print('Invalid database!')
+split_dataset = True  # splits dataset repetition wise
+dataset = ""
 
 #feature_set = ['root_mean_square', 'wave_length', 'histogram', 'mean_absolute_value', 'temporal_moment_3', 'variance', 'log_detector', 'integrated_emg', 'kurtosis', 'average_amplitude_change', 'dasdv', 'simple_square_integral', 'skewness', 'total_power', 'spectral_moment_3', 'mean_frequency', 'median_frequency', 'mean_power', 'peak_frequency', 'variance_of_central_frequency', 'zero_crossings', 'slope_sign_changes', 'DWT']  # full feature set
-
 feature_set = ['zero_crossings', 'simple_square_integral', 'integrated_emg', 'log_detector', 'variance', 'temporal_moment_3', 'mean_absolute_value', 'wave_length', 'root_mean_square'] # time-domain
-
-#feature_set = ['variance', 'histogram', 'mean_absolute_value', 'kurtosis', 'skewness', 'wave_length', 'zero_crossings', 'slope_sign_changes']  # good feature
-
-#feature_set = ['variance', 'mean_absolute_value', 'kurtosis', 'skewness', 'wave_length', 'integrated_emg', 'dasdv', 'root_mean_square']  # simple feature for myo
-#feature_set_acc = ['mean_value']
 feature_set_im = ['mean_value']
 
 # Optimizer parameter
