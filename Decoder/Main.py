@@ -34,7 +34,7 @@ if Parameter.parse_args is True:
         Parameter.database = args.database
 
     if Parameter.database == '1':
-        Parameter.emg_frequency = 2000
+        Parameter.emg_frequency = 100.
         Parameter.acc = False
         Parameter.mag = False
         Parameter.gyro = False
@@ -43,24 +43,24 @@ if Parameter.parse_args is True:
             '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E3.mat',
             '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E2.mat']
     elif Parameter.database == '2':
-        Parameter.emg_frequency = 2000
+        Parameter.emg_frequency = 2000.
         Parameter.mag = False
         Parameter.gyro = False
         Parameter.dataset = [
             '../Ninapro/Dataset_2/DB2_s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E2_A1.mat',
             '../Ninapro/Dataset_2/DB2_s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E1_A1.mat']
     elif Parameter.database == '7':
-        Parameter.emg_frequency = 2000
+        Parameter.emg_frequency = 2000.
         Parameter.dataset = [
             '../Ninapro/Dataset_7/Subject_' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E2_A1.mat',
             '../Ninapro/Dataset_7/Subject_' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E1_A1.mat']
     elif Parameter.database == '8':
-        Parameter.emg_frequency = 1111
+        Parameter.emg_frequency = 1111.
         Parameter.dataset = ['../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A1.mat',
                              '../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A2.mat',
                              '../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A3.mat']
     elif Parameter.database == 'Myo':
-        Parameter.emg_frequency = 50
+        Parameter.emg_frequency = 50.
         Parameter.mag = False
         Parameter.dataset = ['../Ninapro/Myo/S' + str(Parameter.subject) + '_E1.mat',
                              '../Ninapro/Myo/S' + str(Parameter.subject) + '_E2.mat']
@@ -148,7 +148,8 @@ else:
     net.to(Parameter.device)
     net.apply(weights_init)
 
-writer = SummaryWriter(comment=Parameter.comment)  # for tensorboardX
+if Parameter.tensorboard is True:
+    writer = SummaryWriter(comment=Parameter.comment)  # for tensorboardX
 
 
 ########################################################################################################################
@@ -200,27 +201,31 @@ def train():
             if Parameter.one_joint is True:
                 loss_train = loss(output_training[:, 0], training_set.ground_truth[i, :, Parameter.joint]).to(
                     Parameter.device)
-                writer.add_scalars('Performance Training', {'prediction': output_training[-1].data.item(),
-                                                            'ground_truth': training_set.ground_truth[
-                                                                i, -1, Parameter.joint].data.item()}, i)
+                if Parameter.tensorboard is True:
+                    writer.add_scalars('Performance Training', {'prediction': output_training[-1].data.item(),
+                                                                'ground_truth': training_set.ground_truth[
+                                                                    i, -1, Parameter.joint].data.item()}, i)
                 if i < validation_set.ground_truth.shape[0]:
                     loss_valid = loss(output_validate[:, 0], validation_set.ground_truth[i, :, Parameter.joint]).to(
                         Parameter.device)
-                    writer.add_scalars('Performance Validation',
-                                       {'prediction': output_validate[-1].detach().data.item(),
-                                        'ground_truth': validation_set.ground_truth[
-                                            i, -1, Parameter.joint].data.item()}, i)
+                    if Parameter.tensorboard is True:
+                        writer.add_scalars('Performance Validation',
+                                           {'prediction': output_validate[-1].detach().data.item(),
+                                            'ground_truth': validation_set.ground_truth[
+                                                i, -1, Parameter.joint].data.item()}, i)
             else:
                 loss_train = loss(output_training, training_set.ground_truth[i]).to(Parameter.device)
-                writer.add_scalars('Performance Training',
-                                   {'prediction': output_training[-1, Parameter.joint].data.item(),
-                                    'ground_truth': training_set.ground_truth[i, -1, Parameter.joint].data.item()}, i)
+                if Parameter.tensorboard is True:
+                    writer.add_scalars('Performance Training',
+                                       {'prediction': output_training[-1, Parameter.joint].data.item(),
+                                        'ground_truth': training_set.ground_truth[i, -1, Parameter.joint].data.item()}, i)
                 if i < validation_set.ground_truth.shape[0]:
                     loss_valid = loss(output_validate, validation_set.ground_truth[i]).to(Parameter.device)
-                    writer.add_scalars('Performance Validation',
-                                       {'prediction': output_validate[-1, Parameter.joint].detach().data.item(),
-                                        'ground_truth': validation_set.ground_truth[
-                                            i, -1, Parameter.joint].data.item()}, i)
+                    if Parameter.tensorboard is True:
+                        writer.add_scalars('Performance Validation',
+                                           {'prediction': output_validate[-1, Parameter.joint].detach().data.item(),
+                                            'ground_truth': validation_set.ground_truth[
+                                                i, -1, Parameter.joint].data.item()}, i)
 
             loss_train.backward(retain_graph=True)
             optimizer.step()
@@ -264,7 +269,8 @@ def train():
                        model_save_dir + '/' + str(Parameter.network) + '_' + Parameter.comment + '.pth')
 
         # write loss each epoch
-        writer.add_scalars('Loss', {'training_loss': mean_training_loss, 'validation_loss': mean_validation_loss}, j)
+        if Parameter.tensorboard is True:
+            writer.add_scalars('Loss', {'training_loss': mean_training_loss, 'validation_loss': mean_validation_loss}, j)
 
         # # learning rate decay after five epochs stagnating
         # if len(mean_validation_losses) > 10 and len(mean_validation_losses) - index > 1:
@@ -284,7 +290,8 @@ def train():
 
     # save model and write to Tensorboard
     # torch.save(net.state_dict(), 'model.pth')
-    addText()
+    if Parameter.tensorboard is True:
+        addText()
 
     print('Training finished.')
 
@@ -293,7 +300,8 @@ def fit():
     print('Fitting...', flush=True, end='\r')
     clf.fit(training_set.input[:, 0, :].cpu().numpy(), training_set.ground_truth[:, 0, Parameter.joint].cpu().numpy())
     # clf.fit(training_set.input[:, 0, :], training_set.ground_truth[:, 0, Parameter.joint])
-    addText()
+    if Parameter.tensorboard is True:
+        addText()
     print('Fitting finished.')
 
 
@@ -359,15 +367,16 @@ def test():
             hidden_training2)  # one extra 1
         predict_training.detach()  # TODO: what is detach doing?
 
-        if Parameter.one_joint is True:
-            writer.add_scalars('Prediction_Training', {'predict_training': predict_training[-1].data.item(),
-                                                       'ground_truth_training': training_set.ground_truth[
-                                                           k, -1, Parameter.joint].data.item()}, k)
-        else:
-            writer.add_scalars('Prediction_Training',
-                               {'predict_training': predict_training[-1, Parameter.joint].data.item(),
-                                'ground_truth_training': training_set.ground_truth[k, -1, Parameter.joint].data.item()},
-                               k)
+        if Parameter.tensorboard is True:
+            if Parameter.one_joint is True:
+                writer.add_scalars('Prediction_Training', {'predict_training': predict_training[-1].data.item(),
+                                                           'ground_truth_training': training_set.ground_truth[
+                                                               k, -1, Parameter.joint].data.item()}, k)
+            else:
+                writer.add_scalars('Prediction_Training',
+                                   {'predict_training': predict_training[-1, Parameter.joint].data.item(),
+                                    'ground_truth_training': training_set.ground_truth[k, -1, Parameter.joint].data.item()},
+                                   k)
         # hidden_training = net.initHidden()  # TODO: remove later
 
     if Parameter.train is True:
@@ -391,18 +400,18 @@ def test():
         else:
             predict_testing, hidden_testing = test_net(testing_set.input[l].view(1, 1, -1),
                                                        hidden_testing)  # one extra 1
-
-        if Parameter.one_joint is True:
-            writer.add_scalars('Prediction_Testing', {'predict_testing': predict_testing.data.item(),
-                                                      'ground_truth_training': testing_set.ground_truth[
-                                                          l, Parameter.joint].data.item()}, l)
-        else:
-            writer.add_scalars('Prediction_Testing',
-                               {'predict_testing': predict_testing[0, Parameter.joint].data.item(),
-                                'ground_truth_training': testing_set.ground_truth[l, Parameter.joint].data.item()}, l)
-            # for m in range(testing_set.ground_truth.shape[1]):
-            #    writer.add_scalars('Prediction_Testing', {'predict_testing': predict_testing[0, m].data.item(), 'ground_truth_training': testing_set.ground_truth[l, m].data.item()}, l)
-            #    pass  # TODO: continue here
+        if Parameter.tensorboard is True:
+            if Parameter.one_joint is True:
+                writer.add_scalars('Prediction_Testing', {'predict_testing': predict_testing.data.item(),
+                                                          'ground_truth_training': testing_set.ground_truth[
+                                                              l, Parameter.joint].data.item()}, l)
+            else:
+                writer.add_scalars('Prediction_Testing',
+                                   {'predict_testing': predict_testing[0, Parameter.joint].data.item(),
+                                    'ground_truth_training': testing_set.ground_truth[l, Parameter.joint].data.item()}, l)
+                # for m in range(testing_set.ground_truth.shape[1]):
+                #    writer.add_scalars('Prediction_Testing', {'predict_testing': predict_testing[0, m].data.item(), 'ground_truth_training': testing_set.ground_truth[l, m].data.item()}, l)
+                #    pass  # TODO: continue here
 
         # hidden_testing = net.initHidden()  # TODO: remove later
 
@@ -427,29 +436,33 @@ def test():
             file_scores.write('Joint {} R2: {}'.format(n, r2_joint) + '\n')
 
             # add to tensorboard
-            if n < 12:
-                writer.add_text('R2 Score 1', 'J' + str(n) + ': ' + str(r2_joint), n)
-            else:
-                writer.add_text('R2 Score 2', 'J' + str(n) + ': ' + str(r2_joint), n - 12)
+            if Parameter.tensorboard is True:
+                if n < 12:
+                    writer.add_text('R2 Score 1', 'J' + str(n) + ': ' + str(r2_joint), n)
+                else:
+                    writer.add_text('R2 Score 2', 'J' + str(n) + ': ' + str(r2_joint), n - 12)
 
     file_scores.write('R2 Score: ' + str(r2))
     file_scores.close()
-    writer.add_text('Parameter2', 'R2 Score: ' + str(r2), 12)
-    writer.close()
+    if Parameter.tensorboard is True:
+        writer.add_text('Parameter2', 'R2 Score: ' + str(r2), 12)
+        writer.close()
 
 
 def testSVR():
     print('Testing Network ...', flush=True, end='\r')
     prediction = clf.predict(testing_set.input[:, 0, :].cpu())
 
-    for m in range(len(prediction)):
-        writer.add_scalars('Prediction_Testing', {'predict_testing': prediction[m],
-                                                  'ground_truth_training': testing_set.ground_truth[
-                                                      m, Parameter.joint].data.item()}, m)
+    if Parameter.tensorboard is True:
+        for m in range(len(prediction)):
+            writer.add_scalars('Prediction_Testing', {'predict_testing': prediction[m],
+                                                      'ground_truth_training': testing_set.ground_truth[
+                                                          m, Parameter.joint].data.item()}, m)
 
     r2 = r2_score(testing_set.ground_truth[:, Parameter.joint].cpu(), prediction)
-    writer.add_text('Parameter2', 'R2 Score: ' + str(r2), 12)
-    writer.close()
+    if Parameter.tensorboard is True:
+        writer.add_text('Parameter2', 'R2 Score: ' + str(r2), 12)
+        writer.close()
     print('Testing finished.')
     print('R2: {}'.format(r2))
 

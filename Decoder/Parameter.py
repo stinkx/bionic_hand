@@ -22,6 +22,7 @@ comment = 'benchmark200'
 #TODO: regularize with hidden size and even more dropout
 
 parse_args = True
+tensorboard = False
 
 load_input = True
 train = True
