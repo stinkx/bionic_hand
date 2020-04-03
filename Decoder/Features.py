@@ -5,6 +5,25 @@ import Parameter
 
 
 def calc_features(window, window_acc, window_mag, window_gyro, feature_names, feature_names_im, sample_frequency):
+    if type(feature_names) is not list:
+        raise ValueError("EMG feature set must be of type list.")
+    if all(isinstance(n, str) for n in feature_names):
+        raise ValueError("EMG feature set must only contain strings.")
+    if feature_names not in Parameter.supported_features:
+        raise ValueError("One of the EMG features is not supported. Check list of supported features.")
+    if len(set(feature_names)) == len(feature_names):
+        raise ValueError("One of the EMG features appears multiple times.")
+    if type(feature_names_im) is not list:
+        raise ValueError("IM feature set must be of type list.")
+    if all(isinstance(n, str) for n in feature_names_im):
+        raise ValueError("IM feature set must only contain strings.")
+    if feature_names_im not in Parameter.supported_features_im:
+        raise ValueError("One of the IM features is not supported. Check list of supported features.")
+    if len(set(feature_names_im)) == len(feature_names_im):
+        raise ValueError("One of the IM features appears multiple times.")
+    if type(sample_frequency) is not float or sample_frequency <= 0.:
+        raise ValueError("Sample frequency must be of type float and larger than 0.")
+
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     features = torch.Tensor().to(device)
 

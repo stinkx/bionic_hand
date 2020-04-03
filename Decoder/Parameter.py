@@ -17,18 +17,18 @@ parameter = {}
 #TODO: selectkbest and reduce feature set
 #TODO: use other networks (also CRNN)
 
-comment = 'hidden128'
+comment = 'hidden128_noarg'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
-parse_args = True
+parse_args = False
 tensorboard = True
 
 load_input = False
 train = True
 test = True
 database = '8'  # [1, 2, 7, 8, Myo]
-subject = 3
+subject = 1
 exercise = 'ABC'
 
 training_size = 0.8  # 0,4  # TODO: try increasing this
@@ -36,7 +36,7 @@ validation_size = 0.1  # 0,4
 testing_size = 0.1  # 0,05
 
 batch_size = 1              # 32 is good  # TODO: try different batch sizes for CNN
-emg_frequency = 1111.       # [Hz]  100Hz for Ottobock in dataset 1 and 2000Hz for Delsys in dataset 2 and 1111Hz for dataset 8
+emg_frequency = 2000.       # [Hz]  100Hz for Ottobock in dataset 1 and 2000Hz for Delsys in dataset 2 and 1111Hz for dataset 8
 window = 256.               # [ms] length of data window for computing one timestep  150 or 200
 overlap = 100.              # [ms] length of overlap of data window  75 or 150/175
 emd = 0.                    # [ms] electromechanical delay
@@ -53,13 +53,50 @@ notch = False
 
 calc_feature = True
 acc = True  # needs to be off for db1
-mag = True  # needs to be off for db1 and db2
-gyro = True  # needs to be off for db1 and db2
+mag = False  # needs to be off for db1 and db2
+gyro = False  # needs to be off for db1 and db2
 split_dataset = True  # splits dataset repetition wise
-dataset = ""
 
-#feature_set = ['root_mean_square', 'wave_length', 'histogram', 'mean_absolute_value', 'temporal_moment_3', 'variance', 'log_detector', 'integrated_emg', 'kurtosis', 'average_amplitude_change', 'dasdv', 'simple_square_integral', 'skewness', 'total_power', 'spectral_moment_3', 'mean_frequency', 'median_frequency', 'mean_power', 'peak_frequency', 'variance_of_central_frequency', 'zero_crossings', 'slope_sign_changes', 'DWT']  # full feature set
+if parse_args is True:
+    dataset = ""
+else:
+    if database == '1':
+        emg_frequency = 100.
+        acc = False
+        mag = False
+        gyro = False
+        dataset = [
+            '../Ninapro/Dataset_1/s' + str(subject) + '/S' + str(subject) + '_A1_E1.mat',
+            '../Ninapro/Dataset_1/s' + str(subject) + '/S' + str(subject) + '_A1_E3.mat',
+            '../Ninapro/Dataset_1/s' + str(subject) + '/S' + str(subject) + '_A1_E2.mat']
+    elif database == '2':
+        emg_frequency = 2000.
+        mag = False
+        gyro = False
+        dataset = [
+            '../Ninapro/Dataset_2/DB2_s' + str(subject) + '/S' + str(subject) + '_E2_A1.mat',
+            '../Ninapro/Dataset_2/DB2_s' + str(subject) + '/S' + str(subject) + '_E1_A1.mat']
+    elif database == '7':
+        emg_frequency = 2000.
+        dataset = [
+            '../Ninapro/Dataset_7/Subject_' + str(subject) + '/S' + str(subject) + '_E2_A1.mat',
+            '../Ninapro/Dataset_7/Subject_' + str(subject) + '/S' + str(subject) + '_E1_A1.mat']
+    elif database == '8':
+        emg_frequency = 1111.
+        dataset = ['../Ninapro/Dataset_8/S' + str(subject) + '_E1_A1.mat',
+                             '../Ninapro/Dataset_8/S' + str(subject) + '_E1_A2.mat',
+                             '../Ninapro/Dataset_8/S' + str(subject) + '_E1_A3.mat']
+    elif database == 'Myo':
+        emg_frequency = 50.
+        mag = False
+        dataset = ['../Ninapro/Myo/S' + str(subject) + '_E1.mat',
+                             '../Ninapro/Myo/S' + str(subject) + '_E2.mat']
+    else:
+        print('Invalid database!')
+
+supported_features = ['root_mean_square', 'wave_length', 'histogram', 'mean_absolute_value', 'temporal_moment_3', 'variance', 'log_detector', 'integrated_emg', 'kurtosis', 'average_amplitude_change', 'dasdv', 'simple_square_integral', 'skewness', 'total_power', 'spectral_moment_3', 'mean_frequency', 'median_frequency', 'mean_power', 'peak_frequency', 'variance_of_central_frequency', 'zero_crossings', 'slope_sign_changes', 'DWT']  # full feature set
 feature_set = ['zero_crossings', 'simple_square_integral', 'integrated_emg', 'log_detector', 'variance', 'temporal_moment_3', 'mean_absolute_value', 'wave_length', 'root_mean_square'] # time-domain
+supported_features_im = ['mean_value']
 feature_set_im = ['mean_value']
 
 # Optimizer parameter
