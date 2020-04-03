@@ -17,14 +17,14 @@ parameter = {}
 #TODO: selectkbest and reduce feature set
 #TODO: use other networks (also CRNN)
 
-comment = 'benchmark200'
+comment = 'hidden128'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
 parse_args = True
-tensorboard = False
+tensorboard = True
 
-load_input = True
+load_input = False
 train = True
 test = True
 database = '8'  # [1, 2, 7, 8, Myo]
@@ -72,7 +72,7 @@ momentum = 0.95
 loss = 'MSELoss'   # [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss] MSE works best
 network = 'LSTM'  # [RNN, LSTM, GRU, CNN, SVR]
 
-epochs = 3  # 128 for batch 32  #TODO: 15 epochs is not enough
+epochs = 100  # 128 for batch 32  #TODO: 15 epochs is not enough
 sequence = 1  # this has probably effect on the delay!
 
 hidden_size = 128  # regularizes a little bit

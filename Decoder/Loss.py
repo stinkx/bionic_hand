@@ -2,6 +2,9 @@ import torch.nn as nn
 
 
 def get_Loss(loss_name):  # try L2Loss first then L1 and then SmoothL1 if preditcion is constant
+    if type(loss_name) is not str or loss_name not in ["L1Loss", "MSELoss", "KLDivLoss", "BCELoss", "BCEWithLogitsLoss", "HingeEmbeddingLoss", "SmoothL1Loss", "CosineEmbeddingLoss"]:
+        raise ValueError("Loss name must be of type string  and match one of the following functions [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss]")
+
     if loss_name == 'L1Loss':
         loss = nn.L1Loss()
     elif loss_name == 'MSELoss':  # L2 loss
@@ -18,8 +21,5 @@ def get_Loss(loss_name):  # try L2Loss first then L1 and then SmoothL1 if predit
         loss = nn.SmoothL1Loss()
     elif loss_name == 'CosineEmbeddingLoss':
         loss = nn.CosineEmbeddingLoss()
-    else:
-        loss = False
-        print('Invalid Loss!')
 
     return loss
