@@ -95,7 +95,7 @@ if Parameter.parse_args is True:
 # TODO: go through all the code and validate
 # TODO: check if everything runs on GPU
 
-save_dir = "./feature_set/DB_" + str(Parameter.database) + '/S' + str(Parameter.subject) + '/'
+save_dir = "./feature_set/DB_" + str(Parameter.database) + '/S' + str(Parameter.subject) + '/' + Parameter.comment + '_'
 model_save_dir = './model/DB_' + str(Parameter.database) + '/S' + str(Parameter.subject)
 
 if Parameter.load_input is True:
@@ -201,27 +201,27 @@ def train():
             if Parameter.one_joint is True:
                 loss_train = loss(output_training[:, 0], training_set.ground_truth[i, :, Parameter.joint]).to(
                     Parameter.device)
-                if Parameter.tensorboard is True:
+                if Parameter.tensorboard is True and Parameter.log_training_pred is True:
                     writer.add_scalars('Performance Training', {'prediction': output_training[-1].data.item(),
                                                                 'ground_truth': training_set.ground_truth[
                                                                     i, -1, Parameter.joint].data.item()}, i)
                 if i < validation_set.ground_truth.shape[0]:
                     loss_valid = loss(output_validate[:, 0], validation_set.ground_truth[i, :, Parameter.joint]).to(
                         Parameter.device)
-                    if Parameter.tensorboard is True:
+                    if Parameter.tensorboard is True and Parameter.log_training_pred is True:
                         writer.add_scalars('Performance Validation',
                                            {'prediction': output_validate[-1].detach().data.item(),
                                             'ground_truth': validation_set.ground_truth[
                                                 i, -1, Parameter.joint].data.item()}, i)
             else:
                 loss_train = loss(output_training, training_set.ground_truth[i]).to(Parameter.device)
-                if Parameter.tensorboard is True:
+                if Parameter.tensorboard is True and Parameter.log_training_pred is True:
                     writer.add_scalars('Performance Training',
                                        {'prediction': output_training[-1, Parameter.joint].data.item(),
                                         'ground_truth': training_set.ground_truth[i, -1, Parameter.joint].data.item()}, i)
                 if i < validation_set.ground_truth.shape[0]:
                     loss_valid = loss(output_validate, validation_set.ground_truth[i]).to(Parameter.device)
-                    if Parameter.tensorboard is True:
+                    if Parameter.tensorboard is True and Parameter.log_training_pred is True:
                         writer.add_scalars('Performance Validation',
                                            {'prediction': output_validate[-1, Parameter.joint].detach().data.item(),
                                             'ground_truth': validation_set.ground_truth[

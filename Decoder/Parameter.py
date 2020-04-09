@@ -17,17 +17,18 @@ parameter = {}
 #TODO: selectkbest and reduce feature set
 #TODO: use other networks (also CRNN)
 
-comment = 'hidden128_noarg'
+comment = 'hidden128_eingeruckt_500'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
-parse_args = False
-tensorboard = True
+parse_args = True           # parse args as arguments in command line
+tensorboard = True          # turn tensorboard logs on or off
+log_training_pred = False   # Decide whether to log predictions of training and validation set during training process
 
-load_input = False
-train = True
-test = True
-database = '8'  # [1, 2, 7, 8, Myo]
+load_input = False          # load previously generated features
+train = True                # train network
+test = True                 # test network
+database = '8'              # [1, 2, 7, 8, Myo]
 subject = 1
 exercise = 'ABC'
 
@@ -109,7 +110,7 @@ momentum = 0.95
 loss = 'MSELoss'   # [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss] MSE works best
 network = 'LSTM'  # [RNN, LSTM, GRU, CNN, SVR]
 
-epochs = 100  # 128 for batch 32  #TODO: 15 epochs is not enough
+epochs = 500  # 128 for batch 32  #TODO: 15 epochs is not enough
 sequence = 1  # this has probably effect on the delay!
 
 hidden_size = 128  # regularizes a little bit

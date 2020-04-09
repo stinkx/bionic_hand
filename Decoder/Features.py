@@ -7,19 +7,19 @@ import Parameter
 def calc_features(window, window_acc, window_mag, window_gyro, feature_names, feature_names_im, sample_frequency):
     if type(feature_names) is not list:
         raise ValueError("EMG feature set must be of type list.")
-    if all(isinstance(n, str) for n in feature_names):
+    if not all(isinstance(n, str) for n in feature_names):
         raise ValueError("EMG feature set must only contain strings.")
-    if feature_names not in Parameter.supported_features:
+    if not all(feature_name in Parameter.supported_features for feature_name in feature_names):
         raise ValueError("One of the EMG features is not supported. Check list of supported features.")
-    if len(set(feature_names)) == len(feature_names):
+    if not len(set(feature_names)) == len(feature_names):
         raise ValueError("One of the EMG features appears multiple times.")
     if type(feature_names_im) is not list:
         raise ValueError("IM feature set must be of type list.")
-    if all(isinstance(n, str) for n in feature_names_im):
+    if not all(isinstance(n, str) for n in feature_names_im):
         raise ValueError("IM feature set must only contain strings.")
-    if feature_names_im not in Parameter.supported_features_im:
+    if not all(feature_name_im in Parameter.supported_features_im for feature_name_im in feature_names_im):
         raise ValueError("One of the IM features is not supported. Check list of supported features.")
-    if len(set(feature_names_im)) == len(feature_names_im):
+    if not len(set(feature_names_im)) == len(feature_names_im):
         raise ValueError("One of the IM features appears multiple times.")
     if type(sample_frequency) is not float or sample_frequency <= 0.:
         raise ValueError("Sample frequency must be of type float and larger than 0.")
@@ -37,13 +37,13 @@ def calc_features(window, window_acc, window_mag, window_gyro, feature_names, fe
     for feature_name in feature_names:
         features = torch.cat((features, calc_feature(window, feature_name, P, f, w1, device).float()), 1).to(device)
 
-    for feature_name_im in feature_names_im:
-        if Parameter.acc is True:
-            features = torch.cat((features, calc_feature(window_acc, feature_name_im, P, f, w1, device).float()), 1).to(device)
-        if Parameter.mag is True:
-            features = torch.cat((features, calc_feature(window_mag, feature_name_im, P, f, w1, device).float()), 1).to(device)
-        if Parameter.gyro is True:
-            features = torch.cat((features, calc_feature(window_gyro, feature_name_im, P, f, w1, device).float()), 1).to(device)
+        for feature_name_im in feature_names_im:
+            if Parameter.acc is True:
+                features = torch.cat((features, calc_feature(window_acc, feature_name_im, P, f, w1, device).float()), 1).to(device)
+            if Parameter.mag is True:
+                features = torch.cat((features, calc_feature(window_mag, feature_name_im, P, f, w1, device).float()), 1).to(device)
+            if Parameter.gyro is True:
+                features = torch.cat((features, calc_feature(window_gyro, feature_name_im, P, f, w1, device).float()), 1).to(device)
 
     features.unsqueeze_(0)  # add additional dimension to concat
 
