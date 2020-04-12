@@ -17,12 +17,12 @@ parameter = {}
 #TODO: selectkbest and reduce feature set
 #TODO: use other networks (also CRNN)
 
-comment = 'hidden128_eingeruckt_500'
+comment = 'benchmark200'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
 parse_args = True           # parse args as arguments in command line
-tensorboard = True          # turn tensorboard logs on or off
+tensorboard = False          # turn tensorboard logs on or off
 log_training_pred = False   # Decide whether to log predictions of training and validation set during training process
 
 load_input = False          # load previously generated features
@@ -54,8 +54,8 @@ notch = False
 
 calc_feature = True
 acc = True  # needs to be off for db1
-mag = False  # needs to be off for db1 and db2
-gyro = False  # needs to be off for db1 and db2
+mag = True  # needs to be off for db1 and db2
+gyro = True  # needs to be off for db1 and db2
 split_dataset = True  # splits dataset repetition wise
 
 if parse_args is True:
@@ -110,7 +110,7 @@ momentum = 0.95
 loss = 'MSELoss'   # [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss] MSE works best
 network = 'LSTM'  # [RNN, LSTM, GRU, CNN, SVR]
 
-epochs = 500  # 128 for batch 32  #TODO: 15 epochs is not enough
+epochs = 200  # 128 for batch 32  #TODO: 15 epochs is not enough
 sequence = 1  # this has probably effect on the delay!
 
 hidden_size = 128  # regularizes a little bit
