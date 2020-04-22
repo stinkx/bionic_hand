@@ -53,7 +53,7 @@ def calc_features(window, window_acc, window_mag, window_gyro, feature_names, fe
 def calc_feature(window, feature_name, P=0, f=0, w1=0, device=0):
 
     if feature_name == 'mean_value':  # for acc data
-        if Parameter.database == '8':
+        if Parameter.database == '8' or Parameter.database == 'cross-subject8':
             feature0 = torch.mean(window, 0).reshape(16, 3)
         elif Parameter.database == 'Myo':
             feature0 = torch.mean(window, 0).reshape(1, 3).repeat(8, 1)

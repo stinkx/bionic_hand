@@ -17,24 +17,24 @@ parameter = {}
 #TODO: selectkbest and reduce feature set
 #TODO: use other networks (also CRNN)
 
-comment = 'benchmark200'
+comment = 'test_dataset8_cross'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
 parse_args = True           # parse args as arguments in command line
-tensorboard = False          # turn tensorboard logs on or off
+tensorboard = True          # turn tensorboard logs on or off
 log_training_pred = False   # Decide whether to log predictions of training and validation set during training process
 
 load_input = False          # load previously generated features
 train = True                # train network
 test = True                 # test network
-database = '8'              # [1, 2, 7, 8, Myo]
+database = 'cross-subject8'              # [1, 2, 7, 8, Myo]
 subject = 1
 exercise = 'ABC'
 
-training_size = 0.8  # 0,4  # TODO: try increasing this
-validation_size = 0.1  # 0,4
-testing_size = 0.1  # 0,05
+training_size = 0.5  # 0,4  # TODO: try increasing this
+validation_size = 0.1666666666666  # 0,4
+testing_size = 0.3333333333333333333  # 0,05
 
 batch_size = 1              # 32 is good  # TODO: try different batch sizes for CNN
 emg_frequency = 2000.       # [Hz]  100Hz for Ottobock in dataset 1 and 2000Hz for Delsys in dataset 2 and 1111Hz for dataset 8
@@ -56,7 +56,7 @@ calc_feature = True
 acc = True  # needs to be off for db1
 mag = True  # needs to be off for db1 and db2
 gyro = True  # needs to be off for db1 and db2
-split_dataset = True  # splits dataset repetition wise
+split_dataset = False  # splits dataset repetition wise
 
 if parse_args is True:
     dataset = ""
@@ -92,6 +92,12 @@ else:
         mag = False
         dataset = ['../Ninapro/Myo/S' + str(subject) + '_E1.mat',
                              '../Ninapro/Myo/S' + str(subject) + '_E2.mat']
+    elif database == 'cross-subject8':
+        emg_frequency = 1111.
+        dataset = []
+        for s in range(2):
+            for a in range(3):
+                dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
     else:
         print('Invalid database!')
 

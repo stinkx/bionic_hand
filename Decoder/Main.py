@@ -28,7 +28,7 @@ if Parameter.parse_args is True:
                         help='Extract features, train model, test or do all. Valid arguments [feature, train, test, all]')
     args = parser.parse_args()
 
-    if args.database not in ["1", "2", "7", "8", "Myo"]:
+    if args.database not in ["1", "2", "7", "8", "Myo", 'cross-subject8', 'cross-subject2', 'cross-subject7']:
         raise ValueError("Dataset not supported. Choose one of the following [1, 2, 7, 8, Myo]")
     else:
         Parameter.database = args.database
@@ -64,6 +64,12 @@ if Parameter.parse_args is True:
         Parameter.mag = False
         Parameter.dataset = ['../Ninapro/Myo/S' + str(Parameter.subject) + '_E1.mat',
                              '../Ninapro/Myo/S' + str(Parameter.subject) + '_E2.mat']
+    elif Parameter.database == 'cross-subject8':
+        Parameter.emg_frequency = 1111.
+        Parameter.dataset = []
+        for s in range(4):
+            for a in range(3):
+                Parameter.dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
     else:
         print('Invalid database!')
 
