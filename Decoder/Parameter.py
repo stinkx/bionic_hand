@@ -17,18 +17,19 @@ parameter = {}
 #TODO: selectkbest and reduce feature set
 #TODO: use other networks (also CRNN)
 
-comment = 'test_dataset8_cross'
+comment = 'dataset2_reduce_electrodes'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
 parse_args = True           # parse args as arguments in command line
+reduce_electrodes = True    # reduce number of used electrodes
 tensorboard = True          # turn tensorboard logs on or off
 log_training_pred = False   # Decide whether to log predictions of training and validation set during training process
 
 load_input = False          # load previously generated features
-train = True                # train network
-test = True                 # test network
-database = 'cross-subject8'              # [1, 2, 7, 8, Myo]
+train = False                # train network
+test = False                 # test network
+database = '2'              # [1, 2, 7, 8, Myo]
 subject = 1
 exercise = 'ABC'
 
@@ -56,7 +57,7 @@ calc_feature = True
 acc = True  # needs to be off for db1
 mag = True  # needs to be off for db1 and db2
 gyro = True  # needs to be off for db1 and db2
-split_dataset = False  # splits dataset repetition wise
+split_dataset = True  # splits dataset repetition wise
 
 if parse_args is True:
     dataset = ""
@@ -105,6 +106,8 @@ supported_features = ['root_mean_square', 'wave_length', 'histogram', 'mean_abso
 feature_set = ['zero_crossings', 'simple_square_integral', 'integrated_emg', 'log_detector', 'variance', 'temporal_moment_3', 'mean_absolute_value', 'wave_length', 'root_mean_square'] # time-domain
 supported_features_im = ['mean_value']
 feature_set_im = ['mean_value']
+
+used_electrodes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
 # Optimizer parameter
 optimizer = 'SGD'  # [SGD, Adam, Adagrad, Adadelta, RMSprop]  Adagrad best so far  # TODO: try Adagrad for CNN

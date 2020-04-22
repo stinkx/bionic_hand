@@ -1,6 +1,7 @@
 import torch
 import scipy.io as scio
 from scipy import signal
+import numpy as np
 from Features import calc_features
 from sklearn.preprocessing import StandardScaler
 import Parameter
@@ -27,7 +28,12 @@ def process_data():
     # combine all datasets to one
     for dataset_name in Parameter.dataset:
         dataset = scio.loadmat(dataset_name)
-        emg_data = dataset['emg']
+        emg_data = np.ndarray((dataset['emg'].shape[0], 0))
+        if Parameter.reduce_electrodes is True:
+            for electrode in Parameter.used_electrodes:
+                emg_data = np.concatenate((emg_data, np.expand_dims(dataset['emg'][:, electrode], axis=1)), axis=1)
+        else:
+            emg_data = dataset['emg']
         if Parameter.denoise is True:
             # 4th order Butterworth filter
             low = Parameter.low_cut_freq / (0.5 * Parameter.emg_frequency)
@@ -40,12 +46,33 @@ def process_data():
 
         emg = torch.cat((emg, torch.from_numpy(emg_data).float()), 0)
         glove = torch.cat((glove, torch.from_numpy(dataset['glove']).float()), 0)
+
         if Parameter.acc is True:
-            acc = torch.cat((acc, torch.from_numpy(dataset['acc']).float()), 0)
+            if Parameter.reduce_electrodes is True:
+                acc_reduced = torch.Tensor()
+                for electrode in Parameter.used_electrodes:
+                    acc_reduced = torch.cat((acc_reduced, torch.from_numpy(dataset['acc'][:, (electrode-1)*3:(electrode-1)*3+3]).float()), 1)
+                acc = torch.cat((acc, acc_reduced), 0)
+            else:
+                acc = torch.cat((acc, torch.from_numpy(dataset['acc']).float()), 0)
+
         if Parameter.mag is True:
-            mag = torch.cat((mag, torch.from_numpy(dataset['mag']).float()), 0)
+            if Parameter.reduce_electrodes is True:
+                mag_reduced = torch.Tensor()
+                for electrode in Parameter.used_electrodes:
+                    mag_reduced = torch.cat((mag_reduced, torch.from_numpy(dataset['mag'][:, (electrode-1)*3:(electrode-1)*3+3]).float()), 1)
+                mag = torch.cat((mag, mag_reduced), 0)
+            else:
+                mag = torch.cat((mag, torch.from_numpy(dataset['mag']).float()), 0)
+
         if Parameter.gyro is True:
-            gyro = torch.cat((gyro, torch.from_numpy(dataset['gyro']).float()), 0)
+            if Parameter.reduce_electrodes is True:
+                gyro_reduced = torch.Tensor()
+                for electrode in Parameter.used_electrodes:
+                    gyro_reduced = torch.cat((gyro_reduced, torch.from_numpy(dataset['gyro'][:, (electrode-1)*3:(electrode-1)*3+3]).float()), 1)
+                gyro = torch.cat((gyro, gyro_reduced), 0)
+            else:
+                gyro = torch.cat((gyro, torch.from_numpy(dataset['gyro']).float()), 0)
 
         if Parameter.split_dataset is True:
             movement = torch.cat((movement, torch.from_numpy(dataset['restimulus']).float()), 0)
