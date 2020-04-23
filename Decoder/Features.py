@@ -53,12 +53,17 @@ def calc_features(window, window_acc, window_mag, window_gyro, feature_names, fe
 def calc_feature(window, feature_name, P=0, f=0, w1=0, device=0):
 
     if feature_name == 'mean_value':  # for acc data
-        if Parameter.database == '8' or Parameter.database == 'cross-subject8':
-            feature0 = torch.mean(window, 0).reshape(16, 3)
-        elif Parameter.database == 'Myo':
-            feature0 = torch.mean(window, 0).reshape(1, 3).repeat(8, 1)
+        if Parameter.reduce_electrodes is True:
+            feature0 = torch.mean(window, 0).reshape(len(Parameter.used_electrodes), 3)
         else:
-            feature0 = torch.mean(window, 0).reshape(12, 3)
+            if Parameter.database == '8' or Parameter.database == 'cross-subject8':
+                feature0 = torch.mean(window, 0).reshape(16, 3)
+            elif Parameter.database == 'Myo':
+                feature0 = torch.mean(window, 0).reshape(1, 3).repeat(8, 1)
+            elif Parameter.database == '7' or Parameter.database == '2':
+                feature0 = torch.mean(window, 0).reshape(12, 3)
+            else:
+                raise ValueError('Dataset not supported yet.')
 
     elif feature_name == 'root_mean_square':
         feature0 = torch.sqrt(torch.mean(torch.pow(window, 2.), 0))
