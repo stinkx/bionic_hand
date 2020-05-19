@@ -11,7 +11,7 @@ cd Decoder
 
 #python3 Main.py 2 9 train &
 #python3 Main.py 2 10 train &
-#python3 Main.py 2 11 train &
+python3 Main.py 2 11 train &
 #python3 Main.py 2 12 train &
 #python3 Main.py 2 13 train &
 #python3 Main.py 2 14 train &
@@ -20,16 +20,16 @@ cd Decoder
 
 #python3 Main.py 2 17 train &
 #python3 Main.py 2 18 train &
-python3 Main.py 2 19 train &
+#python3 Main.py 2 19 train &
 #python3 Main.py 2 20 train &
-python3 Main.py 2 21 train &
+#python3 Main.py 2 21 train &
 #python3 Main.py 2 22 train &
-python3 Main.py 2 23 train &
+#python3 Main.py 2 23 train &
 #python3 Main.py 2 24 train
 
 #python3 Main.py 2 25 train &
 #python3 Main.py 2 26 train &
-python3 Main.py 2 27 train &
+#python3 Main.py 2 27 train &
 #python3 Main.py 2 28 train &
 #python3 Main.py 2 29 train &
 #python3 Main.py 2 30 train &

@@ -33,6 +33,8 @@ if Parameter.parse_args is True:
     else:
         Parameter.database = args.database
 
+    Parameter.subject = args.subject
+
     if Parameter.database == '1':
         Parameter.emg_frequency = 100.
         Parameter.acc = False
@@ -66,14 +68,13 @@ if Parameter.parse_args is True:
                              '../Ninapro/Myo/S' + str(Parameter.subject) + '_E2.mat']
     elif Parameter.database == 'cross-subject8':
         Parameter.emg_frequency = 1111.
-        Parameter.dataset = []
-        for s in range(4):
-            for a in range(3):
-                Parameter.dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
+    #     Parameter.dataset = []
+    #     for s in range(4):
+    #         for a in range(3):
+    #             Parameter.dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
     else:
         print('Invalid database!')
 
-    Parameter.subject = args.subject
     if args.mode == "feature":
         Parameter.load_input = False
         Parameter.train = False
@@ -412,6 +413,7 @@ def test():
                                                           'ground_truth_training': testing_set.ground_truth[
                                                               l, Parameter.joint].data.item()}, l)
             else:
+                testing_set.ground_truth.squeeze_()
                 writer.add_scalars('Prediction_Testing',
                                    {'predict_testing': predict_testing[0, Parameter.joint].data.item(),
                                     'ground_truth_training': testing_set.ground_truth[l, Parameter.joint].data.item()}, l)

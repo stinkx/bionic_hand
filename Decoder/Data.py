@@ -25,6 +25,7 @@ def process_data():
     movement = torch.Tensor()
     repetition = torch.Tensor()
 
+    print(Parameter.dataset)
     # combine all datasets to one
     for dataset_name in Parameter.dataset:
         dataset = scio.loadmat(dataset_name)
@@ -186,9 +187,9 @@ def process_data():
         border_idx_test = border_idx_valid + int(feature_set.shape[0] * Parameter.testing_size)
 
         # split dataset
-        training_set.ground_truth = glove[:border_idx:, :].to(Parameter.device)
-        validation_set.ground_truth = glove[border_idx:border_idx_valid:, :].to(Parameter.device)
-        testing_set.ground_truth = glove[border_idx_valid:border_idx_test:, :].to(Parameter.device)
+        training_set.ground_truth = glove[:border_idx:, :].clone().to(Parameter.device)
+        validation_set.ground_truth = glove[border_idx:border_idx_valid:, :].clone().to(Parameter.device)
+        testing_set.ground_truth = glove[border_idx_valid:border_idx_test:, :].clone().to(Parameter.device)
 
         glove.cpu()
 
@@ -197,9 +198,9 @@ def process_data():
             validation_set.input = feature_set[border_idx:border_idx_valid:, :, :].to(Parameter.device)
             testing_set.input = feature_set[border_idx_valid:border_idx_test:, :, :].to(Parameter.device)
         else:
-            training_set.input = feature_set[:border_idx:, :].to(Parameter.device)
-            validation_set.input = feature_set[border_idx:border_idx_valid:, :].to(Parameter.device)
-            testing_set.input = feature_set[border_idx_valid:border_idx_test:, :].to(Parameter.device)
+            training_set.input = feature_set[:border_idx:, :].clone().to(Parameter.device)
+            validation_set.input = feature_set[border_idx:border_idx_valid:, :].clone().to(Parameter.device)
+            testing_set.input = feature_set[border_idx_valid:border_idx_test:, :].clone().to(Parameter.device)
 
         if Parameter.derivative_gt is True:  # validated
             training_set.ground_truth = training_set.ground_truth[1:, :] - training_set.ground_truth[:-1, :]

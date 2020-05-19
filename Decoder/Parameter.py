@@ -17,25 +17,25 @@ parameter = {}
 #TODO: selectkbest and reduce feature set
 #TODO: use other networks (also CRNN)
 
-comment = 'dataset2_reduce_electrodes'
+comment = 'cross-subject7'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
 parse_args = True           # parse args as arguments in command line
-reduce_electrodes = True    # reduce number of used electrodes
-tensorboard = True          # turn tensorboard logs on or off
+reduce_electrodes = False    # reduce number of used electrodes
+tensorboard = False          # turn tensorboard logs on or off
 log_training_pred = False   # Decide whether to log predictions of training and validation set during training process
 
 load_input = False          # load previously generated features
 train = False                # train network
 test = False                 # test network
-database = '2'              # [1, 2, 7, 8, Myo]
-subject = 1
+database = '7'              # [1, 2, 7, 8, Myo, cross-subject8]
+subject = 22
 exercise = 'ABC'
 
-training_size = 0.5  # 0,4  # TODO: try increasing this
-validation_size = 0.1666666666666  # 0,4
-testing_size = 0.3333333333333333333  # 0,05
+training_size = 1.0  # 0,4  # TODO: try increasing this
+validation_size = 0.0  # 0,4
+testing_size = 0.0  # 0,05
 
 batch_size = 1              # 32 is good  # TODO: try different batch sizes for CNN
 emg_frequency = 2000.       # [Hz]  100Hz for Ottobock in dataset 1 and 2000Hz for Delsys in dataset 2 and 1111Hz for dataset 8
@@ -57,7 +57,7 @@ calc_feature = True
 acc = True  # needs to be off for db1
 mag = True  # needs to be off for db1 and db2
 gyro = True  # needs to be off for db1 and db2
-split_dataset = True  # splits dataset repetition wise
+split_dataset = False  # splits dataset repetition wise
 
 if parse_args is True:
     dataset = ""
@@ -95,10 +95,10 @@ else:
                              '../Ninapro/Myo/S' + str(subject) + '_E2.mat']
     elif database == 'cross-subject8':
         emg_frequency = 1111.
-        dataset = []
-        for s in range(2):
-            for a in range(3):
-                dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
+    #     dataset = []
+    #     for s in range(2):
+    #         for a in range(3):
+    #             dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
     else:
         print('Invalid database!')
 
