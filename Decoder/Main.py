@@ -17,10 +17,12 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import r2_score
 
 import argparse
+import sys
 
 ########################################################################################################################
 # Parse arguments
-if Parameter.parse_args is True:
+if len(sys.argv) > 1:
+#if Parameter.parse_args is True:
     parser = argparse.ArgumentParser(description='Dataset and subject for parameter study')
     parser.add_argument('database', type=str, help='Ninapro database. Valid arguments [1, 2, 7, 8, Myo]')
     parser.add_argument('subject', type=int, help='Subject in dataset')

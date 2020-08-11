@@ -21,7 +21,7 @@ comment = 'cross-subject8'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
-parse_args = True           # parse args as arguments in command line
+parse_args = False           # parse args as arguments in command line
 reduce_electrodes = False    # reduce number of used electrodes
 tensorboard = True          # turn tensorboard logs on or off
 log_training_pred = False   # Decide whether to log predictions of training and validation set during training process
