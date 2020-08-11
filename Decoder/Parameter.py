@@ -17,13 +17,13 @@ parameter = {}
 #TODO: selectkbest and reduce feature set
 #TODO: use other networks (also CRNN)
 
-comment = 'cross-subject7'
+comment = 'cross-subject8'
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
 parse_args = True           # parse args as arguments in command line
 reduce_electrodes = False    # reduce number of used electrodes
-tensorboard = False          # turn tensorboard logs on or off
+tensorboard = True          # turn tensorboard logs on or off
 log_training_pred = False   # Decide whether to log predictions of training and validation set during training process
 
 load_input = False          # load previously generated features
@@ -37,7 +37,7 @@ training_size = 1.0  # 0,4  # TODO: try increasing this
 validation_size = 0.0  # 0,4
 testing_size = 0.0  # 0,05
 
-batch_size = 1              # 32 is good  # TODO: try different batch sizes for CNN
+batch_size = 8              # 32 is good  # TODO: try different batch sizes for CNN
 emg_frequency = 2000.       # [Hz]  100Hz for Ottobock in dataset 1 and 2000Hz for Delsys in dataset 2 and 1111Hz for dataset 8
 window = 256.               # [ms] length of data window for computing one timestep  150 or 200
 overlap = 100.              # [ms] length of overlap of data window  75 or 150/175
@@ -99,6 +99,8 @@ else:
     #     for s in range(2):
     #         for a in range(3):
     #             dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
+    elif database == 'cross-subject7':
+        emg_frequency = 2000.
     else:
         print('Invalid database!')
 

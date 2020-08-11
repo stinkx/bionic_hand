@@ -25,11 +25,11 @@ cd Decoder
 #python3 Main.py 7 16 feature
 
 #python3 Main.py 7 17 feature &
-#python3 Main.py 7 18 feature
+python3 Main.py 7 18 feature
 
 #python3 Main.py 7 19 feature &
 #python3 Main.py 7 20 feature
 
-python3 Main.py 7 21 feature &
-python3 Main.py 7 22 feature
+#python3 Main.py 7 21 feature &
+#python3 Main.py 7 22 feature
 

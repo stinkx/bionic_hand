@@ -72,6 +72,8 @@ if Parameter.parse_args is True:
     #     for s in range(4):
     #         for a in range(3):
     #             Parameter.dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
+    elif Parameter.database == 'cross-subject7':
+        Parameter.emg_frequency = 2000.
     else:
         print('Invalid database!')
 
