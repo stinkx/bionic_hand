@@ -19,148 +19,223 @@ from sklearn.metrics import r2_score
 import argparse
 import sys
 
+
+class Decoder:
+    def __init__(self):
+        self.net = None
+        self.hidden_size = None
+        self.input_size = None
+        self.output_size = None
+        self.comment = None
+
+        self.reduce_electrodes = False  # reduce number of used electrodes
+        self.tensorboard = True  # turn tensorboard logs on or off
+        self.log_training_pred = False  # Decide whether to log predictions of training and validation set during training process
+
+        self.load_input = False  # load previously generated features
+        self.train = False  # train network
+        self.test = False  # test network
+        self.database = '7'  # [1, 2, 7, 8, Myo, cross-subject8]
+        self.subject = 22
+        self.exercise = 'ABC'
+
+        self.training_size = 1.0  # 0,4  # TODO: try increasing this
+        self.validation_size = 0.0  # 0,4
+        self.testing_size = 0.0  # 0,05
+
+        self.batch_size = 8  # 32 is good  # TODO: try different batch sizes for CNN
+        self.emg_frequency = 2000.  # [Hz]  100Hz for Ottobock in dataset 1 and 2000Hz for Delsys in dataset 2 and 1111Hz for dataset 8
+        self.window = 256.  # [ms] length of data window for computing one timestep  150 or 200
+        self.overlap = 100.  # [ms] length of overlap of data window  75 or 150/175
+        self.emd = 0.  # [ms] electromechanical delay
+        self.low_cut_freq = 20.  # 20
+        self.high_cut_freq = 500.  # max 49 for OttoBock electrodes in dataset 1
+
+        self.normalize_gt = True  # False works better for CNN?
+        self.normalize_in = True  # False for Myo data
+        self.normalize_ft = True
+        self.derivative_gt = False
+
+        self.denoise = False
+        self.notch = False
+
+        self.calc_feature = True
+        self.acc = True  # needs to be off for db1
+        self.mag = True  # needs to be off for db1 and db2
+        self.gyro = True  # needs to be off for db1 and db2
+        self.split_dataset = False  # splits dataset repetition wise
+
+        self.optimizer = 'SGD'  # [SGD, Adam, Adagrad, Adadelta, RMSprop]  Adagrad best so far  # TODO: try Adagrad for CNN
+        self.initializer = ''  # [Xavier_uniform, Xavier_normal, Kaiming_uniform, Kaiming_normal]  Kaiming = He, empty string will cause default initilization
+        self.learning_rate = 1e-5  # 5e-4   TODO: 1e-5 brings validation loss down, do learning rate decay  done
+        self.weight_decay = 0.001  # TODO: try different values here was 0.01 before (this is best)
+        self.momentum = 0.95
+
+        self.loss = 'MSELoss'  # [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss] MSE works best
+        self.model_name = 'RNN.py'  # [RNN.py, LSTM, GRU, CNN, SVR]
+
+        self.epochs = 200  # 128 for batch 32  #TODO: 15 epochs is not enough
+        self.sequence = 1  # this has probably effect on the delay!
+
+        self.hidden_size = 128  # regularizes a little bit
+
+        self.joint = 10  # 20 is wrist
+        self.one_joint = False
+        self.num_layers = 1
+
+        self.bias = True
+        self.dropout = 0.0  # 0.7 did not work better
+
+
+    def setup_network(self):
+        net = get_model(self.model_name, self.input_size, self.output_size, self.hidden_size, self.batch_size,
+                            self.num_layers, self.dropout, self.bias)
+
+        print(net)
+
+def setup(self):
 ########################################################################################################################
 # Parse arguments
-if len(sys.argv) > 1:
-#if Parameter.parse_args is True:
-    parser = argparse.ArgumentParser(description='Dataset and subject for parameter study')
-    parser.add_argument('database', type=str, help='Ninapro database. Valid arguments [1, 2, 7, 8, Myo]')
-    parser.add_argument('subject', type=int, help='Subject in dataset')
-    parser.add_argument('mode', type=str,
-                        help='Extract features, train model, test or do all. Valid arguments [feature, train, test, all]')
-    args = parser.parse_args()
+    if len(sys.argv) > 1:
+    #if Parameter.parse_args is True:
+        parser = argparse.ArgumentParser(description='Dataset and subject for parameter study')
+        parser.add_argument('database', type=str, help='Ninapro database. Valid arguments [1, 2, 7, 8, Myo]')
+        parser.add_argument('subject', type=int, help='Subject in dataset')
+        parser.add_argument('mode', type=str,
+                            help='Extract features, train model, test or do all. Valid arguments [feature, train, test, all]')
+        args = parser.parse_args()
 
-    if args.database not in ["1", "2", "7", "8", "Myo", 'cross-subject8', 'cross-subject2', 'cross-subject7']:
-        raise ValueError("Dataset not supported. Choose one of the following [1, 2, 7, 8, Myo]")
+        if args.database not in ["1", "2", "7", "8", "Myo", 'cross-subject8', 'cross-subject2', 'cross-subject7']:
+            raise ValueError("Dataset not supported. Choose one of the following [1, 2, 7, 8, Myo]")
+        else:
+            Parameter.database = args.database
+
+        Parameter.subject = args.subject
+
+        if Parameter.database == '1':
+            Parameter.emg_frequency = 100.
+            Parameter.acc = False
+            Parameter.mag = False
+            Parameter.gyro = False
+            Parameter.dataset = [
+                '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E1.mat',
+                '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E3.mat',
+                '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E2.mat']
+        elif Parameter.database == '2':
+            Parameter.emg_frequency = 2000.
+            Parameter.mag = False
+            Parameter.gyro = False
+            Parameter.dataset = [
+                '../Ninapro/Dataset_2/DB2_s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E2_A1.mat',
+                '../Ninapro/Dataset_2/DB2_s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E1_A1.mat']
+        elif Parameter.database == '7':
+            Parameter.emg_frequency = 2000.
+            Parameter.dataset = [
+                '../Ninapro/Dataset_7/Subject_' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E2_A1.mat',
+                '../Ninapro/Dataset_7/Subject_' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E1_A1.mat']
+        elif Parameter.database == '8':
+            Parameter.emg_frequency = 1111.
+            Parameter.dataset = ['../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A1.mat',
+                                 '../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A2.mat',
+                                 '../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A3.mat']
+        elif Parameter.database == 'Myo':
+            Parameter.emg_frequency = 50.
+            Parameter.mag = False
+            Parameter.dataset = ['../Ninapro/Myo/S' + str(Parameter.subject) + '_E1.mat',
+                                 '../Ninapro/Myo/S' + str(Parameter.subject) + '_E2.mat']
+        elif Parameter.database == 'cross-subject8':
+            Parameter.emg_frequency = 1111.
+        #     Parameter.dataset = []
+        #     for s in range(4):
+        #         for a in range(3):
+        #             Parameter.dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
+        elif Parameter.database == 'cross-subject7':
+            Parameter.emg_frequency = 2000.
+        else:
+            print('Invalid database!')
+
+        if args.mode == "feature":
+            Parameter.load_input = False
+            Parameter.train = False
+            Parameter.test = False
+        elif args.mode == "train":
+            Parameter.load_input = True
+            Parameter.train = True
+            Parameter.test = True
+        elif args.mode == "test":
+            Parameter.load_input = True
+            Parameter.train = False
+            Parameter.test = True
+        elif args.mode == "all":
+            Parameter.load_input = False
+            Parameter.train = True
+            Parameter.test = True
+        else:
+            raise ValueError("Unknown mode, choose one of the following [feature, train, test, all]")
+
+    # TODO: implement derivative of ground truth data variable true / false     Done + validated
+    # TODO: check weight initialization, set to xavier
+    # TODO: implement CNN + RNN.py (and CNN + LSTM and CNN + GRU)
+    # TODO: implement random search (or bayesian optimization)
+
+    # TODO: go through all the code and validate
+    # TODO: check if everything runs on GPU
+
+    save_dir = "./feature_set/DB_" + str(Parameter.database) + '/S' + str(Parameter.subject) + '/' + Parameter.comment + '_'
+    model_save_dir = './model/DB_' + str(Parameter.database) + '/S' + str(Parameter.subject)
+
+    if Parameter.load_input is True:
+        training_set = torch.Tensor()
+        validation_set = torch.Tensor()
+        testing_set = torch.Tensor()
+
+        training_set.input = torch.load(save_dir + 'training_in.pt').to(Parameter.device)
+        training_set.ground_truth = torch.load(save_dir + 'training_gt.pt').to(Parameter.device)
+        validation_set.input = torch.load(save_dir + 'validation_in.pt').to(Parameter.device)
+        validation_set.ground_truth = torch.load(save_dir + 'validation_gt.pt').to(Parameter.device)
+        testing_set.input = torch.load(save_dir + 'testing_in.pt').to(Parameter.device)
+        testing_set.ground_truth = torch.load(save_dir + 'testing_gt.pt').to(Parameter.device)
     else:
-        Parameter.database = args.database
+        os.makedirs(save_dir, exist_ok=True)
+        training_set, validation_set, testing_set = process_data()
 
-    Parameter.subject = args.subject
+        torch.save(training_set.input, save_dir + 'training_in.pt')
+        torch.save(training_set.ground_truth, save_dir + 'training_gt.pt')
+        torch.save(validation_set.input, save_dir + 'validation_in.pt')
+        torch.save(validation_set.ground_truth, save_dir + 'validation_gt.pt')
+        torch.save(testing_set.input, save_dir + 'testing_in.pt')
+        torch.save(testing_set.ground_truth, save_dir + 'testing_gt.pt')
 
-    if Parameter.database == '1':
-        Parameter.emg_frequency = 100.
-        Parameter.acc = False
-        Parameter.mag = False
-        Parameter.gyro = False
-        Parameter.dataset = [
-            '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E1.mat',
-            '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E3.mat',
-            '../Ninapro/Dataset_1/s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_A1_E2.mat']
-    elif Parameter.database == '2':
-        Parameter.emg_frequency = 2000.
-        Parameter.mag = False
-        Parameter.gyro = False
-        Parameter.dataset = [
-            '../Ninapro/Dataset_2/DB2_s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E2_A1.mat',
-            '../Ninapro/Dataset_2/DB2_s' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E1_A1.mat']
-    elif Parameter.database == '7':
-        Parameter.emg_frequency = 2000.
-        Parameter.dataset = [
-            '../Ninapro/Dataset_7/Subject_' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E2_A1.mat',
-            '../Ninapro/Dataset_7/Subject_' + str(Parameter.subject) + '/S' + str(Parameter.subject) + '_E1_A1.mat']
-    elif Parameter.database == '8':
-        Parameter.emg_frequency = 1111.
-        Parameter.dataset = ['../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A1.mat',
-                             '../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A2.mat',
-                             '../Ninapro/Dataset_8/S' + str(Parameter.subject) + '_E1_A3.mat']
-    elif Parameter.database == 'Myo':
-        Parameter.emg_frequency = 50.
-        Parameter.mag = False
-        Parameter.dataset = ['../Ninapro/Myo/S' + str(Parameter.subject) + '_E1.mat',
-                             '../Ninapro/Myo/S' + str(Parameter.subject) + '_E2.mat']
-    elif Parameter.database == 'cross-subject8':
-        Parameter.emg_frequency = 1111.
-    #     Parameter.dataset = []
-    #     for s in range(4):
-    #         for a in range(3):
-    #             Parameter.dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
-    elif Parameter.database == 'cross-subject7':
-        Parameter.emg_frequency = 2000.
+    input_size = training_set.input.shape[2]  # equals EMG channels x number of features
+    if Parameter.one_joint is True:
+        output_size = 1
     else:
-        print('Invalid database!')
+        output_size = training_set.ground_truth.shape[2]
 
-    if args.mode == "feature":
-        Parameter.load_input = False
-        Parameter.train = False
-        Parameter.test = False
-    elif args.mode == "train":
-        Parameter.load_input = True
-        Parameter.train = True
-        Parameter.test = True
-    elif args.mode == "test":
-        Parameter.load_input = True
-        Parameter.train = False
-        Parameter.test = True
-    elif args.mode == "all":
-        Parameter.load_input = False
-        Parameter.train = True
-        Parameter.test = True
+    Parameter.parameter['input_size'] = input_size
+    os.makedirs(model_save_dir, exist_ok=True)
+    torch.save(Parameter.parameter, model_save_dir + '/' + str(
+        Parameter.network) + '_' + Parameter.comment + '.pt')  # TODO: change this path (for online prediction)
+
+    if Parameter.network == "SVR":
+        if Parameter.regression_model == 'SVR':
+            clf = SVR(gamma='auto', C=Parameter.c, epsilon=Parameter.epsilon)  # 0.0124 C=2/0.0178 e=0.05/0.185
+        elif Parameter.regression_model == 'LR':
+            clf = LinearRegression()
+        elif Parameter.regression_model == 'KRR':
+            clf = KernelRidge(kernel=Parameter.kernel, alpha=Parameter.alpha, gamma=Parameter.gamma)
+        # clf = GridSearchCV(SVR(kernel='rbf', gamma=0.1), cv=5, param_grid={"C": [1e0, 1e1, 1e2, 1e3], "gamma": np.logspace(-2, 2, 5)})
+        # clf = GridSearchCV(KernelRidge(kernel='rbf', gamma=0.1), cv=5, param_grid={"alpha": [1e0, 0.1, 1e-2, 1e-3], "gamma": np.logspace(-2, 2, 5)})
+        # clf = GridSearchCV(KernelRidge(kernel='rbf', gamma=0.1), cv=5, param_grid={"alpha": [10], "gamma": [1e-4]})
+
     else:
-        raise ValueError("Unknown mode, choose one of the following [feature, train, test, all]")
+        net = get_model(Parameter.network, input_size, output_size, Parameter.hidden_size, Parameter.batch_size,
+                        Parameter.num_layers, Parameter.dropout, Parameter.bias)
+        net.to(Parameter.device)
+        net.apply(weights_init)
 
-# TODO: implement derivative of ground truth data variable true / false     Done + validated
-# TODO: check weight initialization, set to xavier
-# TODO: implement CNN + RNN (and CNN + LSTM and CNN + GRU)
-# TODO: implement random search (or bayesian optimization)
-
-# TODO: go through all the code and validate
-# TODO: check if everything runs on GPU
-
-save_dir = "./feature_set/DB_" + str(Parameter.database) + '/S' + str(Parameter.subject) + '/' + Parameter.comment + '_'
-model_save_dir = './model/DB_' + str(Parameter.database) + '/S' + str(Parameter.subject)
-
-if Parameter.load_input is True:
-    training_set = torch.Tensor()
-    validation_set = torch.Tensor()
-    testing_set = torch.Tensor()
-
-    training_set.input = torch.load(save_dir + 'training_in.pt').to(Parameter.device)
-    training_set.ground_truth = torch.load(save_dir + 'training_gt.pt').to(Parameter.device)
-    validation_set.input = torch.load(save_dir + 'validation_in.pt').to(Parameter.device)
-    validation_set.ground_truth = torch.load(save_dir + 'validation_gt.pt').to(Parameter.device)
-    testing_set.input = torch.load(save_dir + 'testing_in.pt').to(Parameter.device)
-    testing_set.ground_truth = torch.load(save_dir + 'testing_gt.pt').to(Parameter.device)
-else:
-    os.makedirs(save_dir, exist_ok=True)
-    training_set, validation_set, testing_set = process_data()
-
-    torch.save(training_set.input, save_dir + 'training_in.pt')
-    torch.save(training_set.ground_truth, save_dir + 'training_gt.pt')
-    torch.save(validation_set.input, save_dir + 'validation_in.pt')
-    torch.save(validation_set.ground_truth, save_dir + 'validation_gt.pt')
-    torch.save(testing_set.input, save_dir + 'testing_in.pt')
-    torch.save(testing_set.ground_truth, save_dir + 'testing_gt.pt')
-
-input_size = training_set.input.shape[2]  # equals EMG channels x number of features
-if Parameter.one_joint is True:
-    output_size = 1
-else:
-    output_size = training_set.ground_truth.shape[2]
-
-Parameter.parameter['input_size'] = input_size
-os.makedirs(model_save_dir, exist_ok=True)
-torch.save(Parameter.parameter, model_save_dir + '/' + str(
-    Parameter.network) + '_' + Parameter.comment + '.pt')  # TODO: change this path (for online prediction)
-
-if Parameter.network == "SVR":
-    if Parameter.regression_model == 'SVR':
-        clf = SVR(gamma='auto', C=Parameter.c, epsilon=Parameter.epsilon)  # 0.0124 C=2/0.0178 e=0.05/0.185
-    elif Parameter.regression_model == 'LR':
-        clf = LinearRegression()
-    elif Parameter.regression_model == 'KRR':
-        clf = KernelRidge(kernel=Parameter.kernel, alpha=Parameter.alpha, gamma=Parameter.gamma)
-    # clf = GridSearchCV(SVR(kernel='rbf', gamma=0.1), cv=5, param_grid={"C": [1e0, 1e1, 1e2, 1e3], "gamma": np.logspace(-2, 2, 5)})
-    # clf = GridSearchCV(KernelRidge(kernel='rbf', gamma=0.1), cv=5, param_grid={"alpha": [1e0, 0.1, 1e-2, 1e-3], "gamma": np.logspace(-2, 2, 5)})
-    # clf = GridSearchCV(KernelRidge(kernel='rbf', gamma=0.1), cv=5, param_grid={"alpha": [10], "gamma": [1e-4]})
-
-else:
-    net = get_model(Parameter.network, input_size, output_size, Parameter.hidden_size, Parameter.batch_size,
-                    Parameter.num_layers, Parameter.dropout, Parameter.bias)
-    net.to(Parameter.device)
-    net.apply(weights_init)
-
-if Parameter.tensorboard is True:
-    writer = SummaryWriter(comment=Parameter.comment)  # for tensorboardX
+    if Parameter.tensorboard is True:
+        writer = SummaryWriter(comment=Parameter.comment)  # for tensorboardX
 
 
 ########################################################################################################################
@@ -173,8 +248,8 @@ def train():
     loss = get_Loss(Parameter.loss).to(Parameter.device)
     # optimizer = get_optimizer(Parameter.optimizer, net.parameters(), learning_rate, Parameter.weight_decay, Parameter.momentum)
 
-    hidden_training = net.initHidden()
-    hidden_validate = net.initHidden()
+    hidden_training = net.init_hidden()
+    hidden_validate = net.init_hidden()
 
     net.zero_grad()
     net.train()
@@ -258,11 +333,11 @@ def train():
 
             # TODO: try setting hidden to zero sometimes
             if (i + 1) % 10 == 0:  # much better performance!
-                hidden_training = net.initHidden()
-                hidden_validate = net.initHidden()
+                hidden_training = net.init_hidden()
+                hidden_validate = net.init_hidden()
 
-        hidden_training = net.initHidden()
-        hidden_validate = net.initHidden()
+        hidden_training = net.init_hidden()
+        hidden_validate = net.init_hidden()
 
         mean_validation_loss = mean(validation_losses)
         mean_validation_losses.append(mean_validation_loss)
@@ -370,7 +445,7 @@ def test():
     net.eval()
     torch.no_grad()
 
-    hidden_training2 = net.initHidden()
+    hidden_training2 = net.init_hidden()
 
     for k in range(int(training_set.ground_truth.shape[0] / Parameter.sequence)):
         predict_training, hidden_training2 = net(
@@ -388,7 +463,7 @@ def test():
                                    {'predict_training': predict_training[-1, Parameter.joint].data.item(),
                                     'ground_truth_training': training_set.ground_truth[k, -1, Parameter.joint].data.item()},
                                    k)
-        # hidden_training = net.initHidden()  # TODO: remove later
+        # hidden_training = net.init_hidden()  # TODO: remove later
 
     if Parameter.train is True:
         test_net = net.eval()
@@ -401,7 +476,7 @@ def test():
         torch.no_grad()
         test_net.to(Parameter.device)
 
-    hidden_testing = test_net.initHidden()
+    hidden_testing = test_net.init_hidden()
 
     prediction = torch.Tensor()
 
@@ -425,7 +500,7 @@ def test():
                 #    writer.add_scalars('Prediction_Testing', {'predict_testing': predict_testing[0, m].data.item(), 'ground_truth_training': testing_set.ground_truth[l, m].data.item()}, l)
                 #    pass  # TODO: continue here
 
-        # hidden_testing = net.initHidden()  # TODO: remove later
+        # hidden_testing = net.init_hidden()  # TODO: remove later
 
         prediction = torch.cat((prediction, predict_testing.detach().cpu()),
                                0)  # TODO: ValueError: y_true and y_pred have different number of output (1!=22)
@@ -482,17 +557,22 @@ def testSVR():
 ########################################################################################################################
 # Execute code
 
-# TODO: do a for loop and go through different parameter
-if Parameter.train is True:
-    if Parameter.network == "SVR":
-        fit()
-    else:
-        train()
+if __name__ == "__main__":
+    decoder = Decoder()
+    decoder.setup_network()
 
-if Parameter.test is True:
-    if Parameter.network == "SVR":
-        testSVR()
-    else:
-        test()
 
-print('Done.')
+    # TODO: do a for loop and go through different parameter
+    # if Parameter.train is True:
+    #     if Parameter.network == "SVR":
+    #         fit()
+    #     else:
+    #         train()
+    #
+    # if Parameter.test is True:
+    #     if Parameter.network == "SVR":
+    #         testSVR()
+    #     else:
+    #         test()
+    #
+    # print('Done.')

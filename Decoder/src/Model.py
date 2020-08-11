@@ -3,59 +3,61 @@ import torch
 
 
 def get_model(model_name, input_size, output_size, hidden_size, batch_size, num_layers, dropout, bias):
-    if type(model_name) is not str or model_name not in ["RNN", "LSTM", "GRU", "GBRT", "CNN", "CRNN"]:
-        raise ValueError("Model name must be a string and match one of the implemented networks.")
-    if type(input_size) is not int or input_size < 0:
-        raise ValueError("Input size must be of type int and positive.")
-    if type(output_size) is not int or output_size < 0:
-        raise ValueError("Output size must be of type int and positive.")
-    if type(hidden_size) is not int or hidden_size < 0:
-        raise ValueError("Hidden size must be of type int and positive.")
-    if type(batch_size) is not int or batch_size < 0:
-        raise ValueError("Batch size must be of type int and positive.")
-    if type(num_layers) is not int or num_layers < 0:
-        raise ValueError("Number of layers must be of type int and positive.")
-    if num_layers > 10:
-        raise ValueError("Number of layers is unreasonably high.")
-    if type(dropout) is not float or dropout < 0 or dropout >= 1:
-        raise ValueError("Dropout must be of type float and between 0 and 1.")
-    if type(bias) is not bool:
-        raise ValueError("Bias must be of type boolean.")
+    # if type(model_name) is not str or model_name not in ["RNN.py", "LSTM", "GRU", "GBRT", "CNN", "CRNN"]:
+    #     raise ValueError("Model name must be a string and match one of the implemented networks.")
+    # if type(input_size) is not int or input_size < 0:
+    #     raise ValueError("Input size must be of type int and positive.")
+    # if type(output_size) is not int or output_size < 0:
+    #     raise ValueError("Output size must be of type int and positive.")
+    # if type(hidden_size) is not int or hidden_size < 0:
+    #     raise ValueError("Hidden size must be of type int and positive.")
+    # if type(batch_size) is not int or batch_size < 0:
+    #     raise ValueError("Batch size must be of type int and positive.")
+    # if type(num_layers) is not int or num_layers < 0:
+    #     raise ValueError("Number of layers must be of type int and positive.")
+    # if num_layers > 10:
+    #     raise ValueError("Number of layers is unreasonably high.")
+    # if type(dropout) is not float or dropout < 0 or dropout >= 1:
+    #     raise ValueError("Dropout must be of type float and between 0 and 1.")
+    # if type(bias) is not bool:
+    #     raise ValueError("Bias must be of type boolean.")
 
     # check for Cuda device
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    #device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    if model_name == 'RNN':
-        class RNN(nn.Module):
-            def __init__(self):
-                super(RNN, self).__init__()
-                self.input_size = input_size
-                self.hidden_size = hidden_size
-                self.batch_size = batch_size
-                self.num_layers = num_layers
+    if model_name == 'RNN.py':
+        from .networks.RNN import RNN
 
-                # Define the LSTM layer
-                self.rnn = nn.RNN(input_size, hidden_size, num_layers, nonlinearity='tanh', dropout=dropout, bias=bias)
-
-                # Define the output layer
-                self.h2o = nn.Linear(self.hidden_size, output_size, bias=bias)
-
-            def forward(self, input_data, hidden):
-                rnn_out, hidden = self.rnn(input_data, hidden)
-                #output = torch.sigmoid(self.h2o(rnn_out[-1, :, :]))  # only use last sequence for prediction
-                output = self.h2o(rnn_out[-1, :, :])
-
-                return output, hidden
-
-            def initHidden(self):
-                return torch.zeros(self.num_layers, self.batch_size, self.hidden_size).to(device)
+        # class RNN.py(nn.Module):
+        #     def __init__(self):
+        #         super(RNN.py, self).__init__()
+        #         self.input_size = input_size
+        #         self.hidden_size = hidden_size
+        #         self.batch_size = batch_size
+        #         self.num_layers = num_layers
+        #
+        #         # Define the LSTM layer
+        #         self.rnn = nn.RNN.py(input_size, hidden_size, num_layers, nonlinearity='tanh', dropout=dropout, bias=bias)
+        #
+        #         # Define the output layer
+        #         self.h2o = nn.Linear(self.hidden_size, output_size, bias=bias)
+        #
+        #     def forward(self, input_data, hidden):
+        #         rnn_out, hidden = self.rnn(input_data, hidden)
+        #         #output = torch.sigmoid(self.h2o(rnn_out[-1, :, :]))  # only use last sequence for prediction
+        #         output = self.h2o(rnn_out[-1, :, :])
+        #
+        #         return output, hidden
+        #
+        #     def initHidden(self):
+        #         return torch.zeros(self.num_layers, self.batch_size, self.hidden_size).to(device)
 
         return RNN()
 
     # elif model_name == 'RNN_custom':
-    #     class RNN(nn.Module):
+    #     class RNN.py(nn.Module):
     #         def __init__(self):
-    #             super(RNN, self).__init__()
+    #             super(RNN.py, self).__init__()
     #
     #             self.hidden_size = hidden_size
     #
@@ -74,7 +76,7 @@ def get_model(model_name, input_size, output_size, hidden_size, batch_size, num_
     #             # hidden = torch.zeros(1, self.hidden_size).to(device)
     #             return hidden
     #
-    #     return RNN()
+    #     return RNN.py()
 
     elif model_name == 'LSTM':
         class LSTM(nn.Module):
