@@ -1,7 +1,7 @@
 import torch.nn as nn
 
 
-def get_Loss(loss_name):  # try L2Loss first then L1 and then SmoothL1 if preditcion is constant
+def get_loss(loss_name):  # try L2Loss first then L1 and then SmoothL1 if preditcion is constant
     if type(loss_name) is not str or loss_name not in ["L1Loss", "MSELoss", "KLDivLoss", "BCELoss", "BCEWithLogitsLoss", "HingeEmbeddingLoss", "SmoothL1Loss", "CosineEmbeddingLoss"]:
         raise ValueError("Loss name must be of type string  and match one of the following functions [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss]")
 

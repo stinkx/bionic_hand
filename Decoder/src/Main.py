@@ -22,10 +22,10 @@ import sys
 
 class Decoder:
     def __init__(self):
-        self.net = None
-        self.hidden_size = None
-        self.input_size = None
-        self.output_size = None
+        self.net = 1
+        self.hidden_size = 1
+        self.input_size = 1
+        self.output_size = 1
         self.comment = None
 
         self.reduce_electrodes = False  # reduce number of used electrodes
@@ -72,7 +72,7 @@ class Decoder:
         self.momentum = 0.95
 
         self.loss = 'MSELoss'  # [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss] MSE works best
-        self.model_name = 'RNN.py'  # [RNN.py, LSTM, GRU, CNN, SVR]
+        self.model_name = 'Elman'  # [Elman, LSTM, GRU, CNN, SVR]
 
         self.epochs = 200  # 128 for batch 32  #TODO: 15 epochs is not enough
         self.sequence = 1  # this has probably effect on the delay!
@@ -175,7 +175,7 @@ def setup(self):
 
     # TODO: implement derivative of ground truth data variable true / false     Done + validated
     # TODO: check weight initialization, set to xavier
-    # TODO: implement CNN + RNN.py (and CNN + LSTM and CNN + GRU)
+    # TODO: implement CNN + Elman.py (and CNN + LSTM and CNN + GRU)
     # TODO: implement random search (or bayesian optimization)
 
     # TODO: go through all the code and validate
@@ -245,7 +245,7 @@ def setup(self):
 def train():
     decay = 1.
     learning_rate = Parameter.learning_rate
-    loss = get_Loss(Parameter.loss).to(Parameter.device)
+    loss = get_loss(Parameter.loss).to(Parameter.device)
     # optimizer = get_optimizer(Parameter.optimizer, net.parameters(), learning_rate, Parameter.weight_decay, Parameter.momentum)
 
     hidden_training = net.init_hidden()

@@ -119,7 +119,7 @@ weight_decay = 0.001  # TODO: try different values here was 0.01 before (this is
 momentum = 0.95
 
 loss = 'MSELoss'   # [L1Loss, MSELoss, KLDivLoss, BCELoss, BCEWithLogitsLoss, HingeEmbeddingLoss, SmoothL1Loss, CosineEmbeddingLoss] MSE works best
-network = 'LSTM'  # [RNN.py, LSTM, GRU, CNN, SVR]
+network = 'LSTM'  # [Elman.py, LSTM, GRU, CNN, SVR]
 
 epochs = 200  # 128 for batch 32  #TODO: 15 epochs is not enough
 sequence = 1  # this has probably effect on the delay!

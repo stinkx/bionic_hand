@@ -2,10 +2,11 @@ import torch
 import scipy.io as scio
 from scipy import signal
 import numpy as np
-from Features import calc_features
 from sklearn.preprocessing import StandardScaler
-import Parameter
 import time
+
+from Decoder.src.Features import calc_features
+import Parameter
 
 
 def process_data():

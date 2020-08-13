@@ -1,13 +1,15 @@
 import torch
 import torch.nn as nn
-from ..Main import Decoder
+from Decoder.src.Main import Decoder
 
 
-class RNN(Decoder, nn.Module):
+class Elman(Decoder, nn.Module):
+
     def __init__(self):
-        super(RNN, self).__init__()
+        super(Elman, self).__init__()
+        super(Decoder, self).__init__()
 
-        # Define the LSTM layer
+        # Define the RNN layer
         self.rnn = nn.RNN(self.input_size, self.hidden_size, self.num_layers, nonlinearity='tanh', dropout=self.dropout, bias=self.bias)
 
         # Define the output layer
