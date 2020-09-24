@@ -3,11 +3,12 @@ import torch
 import os
 from statistics import mean
 import torch.nn as nn
-from Model import get_model
-from Optimizer import get_optimizer
-from Loss import get_Loss
-from Data import process_data
-from Initializer import weights_init
+from Decoder.src.Model import get_model
+from Decoder.src.Optimizer import get_optimizer
+from Decoder.src.Loss import get_loss
+from Decoder.src.Data import process_data
+from Decoder.src.Initializer import weights_init
+#from Decoder.src.Initializer import choose_init
 import Parameter
 from tensorboardX import SummaryWriter
 from sklearn.svm import SVR
@@ -66,7 +67,7 @@ class Decoder:
         self.split_dataset = False  # splits dataset repetition wise
 
         self.optimizer = 'SGD'  # [SGD, Adam, Adagrad, Adadelta, RMSprop]  Adagrad best so far  # TODO: try Adagrad for CNN
-        self.initializer = ''  # [Xavier_uniform, Xavier_normal, Kaiming_uniform, Kaiming_normal]  Kaiming = He, empty string will cause default initilization
+        self.initializer = 'Xavier_uniform'  # [Xavier_uniform, Xavier_normal, Kaiming_uniform, Kaiming_normal]  Kaiming = He, empty string will cause default initilization
         self.learning_rate = 1e-5  # 5e-4   TODO: 1e-5 brings validation loss down, do learning rate decay  done
         self.weight_decay = 0.001  # TODO: try different values here was 0.01 before (this is best)
         self.momentum = 0.95
@@ -86,11 +87,10 @@ class Decoder:
         self.bias = True
         self.dropout = 0.0  # 0.7 did not work better
 
-
     def setup_network(self):
         net = get_model(self.model_name, self.input_size, self.output_size, self.hidden_size, self.batch_size,
                             self.num_layers, self.dropout, self.bias)
-
+        net.apply(weights_init)
         print(net)
 
 def setup(self):
@@ -145,10 +145,6 @@ def setup(self):
                                  '../Ninapro/Myo/S' + str(Parameter.subject) + '_E2.mat']
         elif Parameter.database == 'cross-subject8':
             Parameter.emg_frequency = 1111.
-        #     Parameter.dataset = []
-        #     for s in range(4):
-        #         for a in range(3):
-        #             Parameter.dataset.append('../Ninapro/Dataset_8/S' + str(s+1) + '_E1_A' + str(a+1) + '.mat')
         elif Parameter.database == 'cross-subject7':
             Parameter.emg_frequency = 2000.
         else:
