@@ -17,27 +17,28 @@ parameter = {}
 #TODO: selectkbest and reduce feature set
 #TODO: use other networks (also CRNN)
 
-comment = 'cross-subject8'
+comment = "DB7S2"
 #TODO: smaller learning rate worked well, regularize even more (1e-5)
 #TODO: regularize with hidden size and even more dropout
 
 parse_args = False           # parse args as arguments in command line
 reduce_electrodes = False    # reduce number of used electrodes
 tensorboard = True          # turn tensorboard logs on or off
+save_predictions = True
 log_training_pred = False   # Decide whether to log predictions of training and validation set during training process
 
-load_input = False          # load previously generated features
+load_input = True          # load previously generated features
 train = False                # train network
-test = False                 # test network
+test = True                 # test network
 database = '7'              # [1, 2, 7, 8, Myo, cross-subject8]
-subject = 22
+subject = 2
 exercise = 'ABC'
 
 training_size = 1.0  # 0,4  # TODO: try increasing this
 validation_size = 0.0  # 0,4
 testing_size = 0.0  # 0,05
 
-batch_size = 8              # 32 is good  # TODO: try different batch sizes for CNN
+batch_size = 1              # 32 is good  # TODO: try different batch sizes for CNN
 emg_frequency = 2000.       # [Hz]  100Hz for Ottobock in dataset 1 and 2000Hz for Delsys in dataset 2 and 1111Hz for dataset 8
 window = 256.               # [ms] length of data window for computing one timestep  150 or 200
 overlap = 100.              # [ms] length of overlap of data window  75 or 150/175
@@ -57,7 +58,7 @@ calc_feature = True
 acc = True  # needs to be off for db1
 mag = True  # needs to be off for db1 and db2
 gyro = True  # needs to be off for db1 and db2
-split_dataset = False  # splits dataset repetition wise
+split_dataset = True  # splits dataset repetition wise
 
 if parse_args is True:
     dataset = ""
@@ -126,7 +127,7 @@ sequence = 1  # this has probably effect on the delay!
 
 hidden_size = 128  # regularizes a little bit
 
-joint = 10  # 20 is wrist
+joint = 17  # 20 is wrist
 one_joint = False
 num_layers = 1
 

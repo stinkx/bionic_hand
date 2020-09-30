@@ -15,6 +15,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.kernel_ridge import KernelRidge
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import r2_score
+import matplotlib.pyplot as plt
 
 import argparse
 import sys
@@ -120,6 +121,8 @@ if Parameter.load_input is True:
     validation_set.ground_truth = torch.load(save_dir + 'validation_gt.pt').to(Parameter.device)
     testing_set.input = torch.load(save_dir + 'testing_in.pt').to(Parameter.device)
     testing_set.ground_truth = torch.load(save_dir + 'testing_gt.pt').to(Parameter.device)
+
+    input_size = training_set.input.shape[2]  # equals EMG channels x number of features
 else:
     os.makedirs(save_dir, exist_ok=True)
     training_set, validation_set, testing_set = process_data()
@@ -131,16 +134,17 @@ else:
     torch.save(testing_set.input, save_dir + 'testing_in.pt')
     torch.save(testing_set.ground_truth, save_dir + 'testing_gt.pt')
 
-input_size = training_set.input.shape[2]  # equals EMG channels x number of features
+    input_size = training_set.input.shape[2]  # equals EMG channels x number of features
+    Parameter.parameter['input_size'] = input_size
+    os.makedirs(model_save_dir, exist_ok=True)
+    torch.save(Parameter.parameter, model_save_dir + '/' + str(
+        Parameter.network) + '_' + Parameter.comment + '.pt')  # TODO: change this path (for online prediction)
+
 if Parameter.one_joint is True:
     output_size = 1
 else:
     output_size = training_set.ground_truth.shape[2]
 
-Parameter.parameter['input_size'] = input_size
-os.makedirs(model_save_dir, exist_ok=True)
-torch.save(Parameter.parameter, model_save_dir + '/' + str(
-    Parameter.network) + '_' + Parameter.comment + '.pt')  # TODO: change this path (for online prediction)
 
 if Parameter.network == "SVR":
     if Parameter.regression_model == 'SVR':
@@ -404,6 +408,8 @@ def test():
     hidden_testing = test_net.initHidden()
 
     prediction = torch.Tensor()
+    # predicted_list = []
+    # gt_list = []
 
     for l in range(testing_set.ground_truth.shape[0]):
         if Parameter.network == "CNN" or Parameter.network == 'CRNN':
@@ -425,10 +431,15 @@ def test():
                 #    writer.add_scalars('Prediction_Testing', {'predict_testing': predict_testing[0, m].data.item(), 'ground_truth_training': testing_set.ground_truth[l, m].data.item()}, l)
                 #    pass  # TODO: continue here
 
-        # hidden_testing = net.initHidden()  # TODO: remove later
+        # if Parameter.save_predictions is True:
+        #     predicted_list.append(predict_testing[0, Parameter.joint].data.item())
+        #     gt_list.append(testing_set.ground_truth[l, Parameter.joint].data.item())
 
-        prediction = torch.cat((prediction, predict_testing.detach().cpu()),
-                               0)  # TODO: ValueError: y_true and y_pred have different number of output (1!=22)
+        # hidden_testing = net.initHidden()  # TODO: remove later
+        # print(predict_testing.detach().cpu())
+        # print(predict_testing.detach().cpu().size())
+
+        prediction = torch.cat((prediction, predict_testing.detach().cpu()), 0)  # TODO: ValueError: y_true and y_pred have different number of output (1!=22)
 
     print('Testing finished.')
 
@@ -459,6 +470,24 @@ def test():
     if Parameter.tensorboard is True:
         writer.add_text('Parameter2', 'R2 Score: ' + str(r2), 12)
         writer.close()
+
+    #TODO exclude test set when doing normalization
+    #TODO rescale before evaluating R2 score
+    print(prediction.size())
+
+    if Parameter.save_predictions is True:
+        parameter = torch.load('./model/DB_' + Parameter.database + '/S' + str(Parameter.subject) + '/' + Parameter.network + '_' + Parameter.comment + '.pt')
+        print(parameter)
+        if Parameter.normalize_gt is True:
+            prediction = parameter['scaler_gt'].inverse_transform(prediction)
+            ground_truth = parameter['scaler_gt'].inverse_transform(testing_set.ground_truth.cpu())
+            # prediction = prediction * parameter['std_gt'] + parameter['mean_gt']
+        # plt.plot(range(testing_set.ground_truth.shape[0]), testing_set.ground_truth.cpu()[:, Parameter.joint], 'green', 'dashed', range(testing_set.ground_truth.shape[0]), prediction[:, Parameter.joint])
+        plt.plot(range(testing_set.ground_truth.shape[0]), ground_truth[:, Parameter.joint], '--', color='#ff9933')
+        # plt.plot(range(testing_set.ground_truth.shape[0]), testing_set.ground_truth.cpu()[:, Parameter.joint], '--', color='#ff9933')
+        plt.plot(range(testing_set.ground_truth.shape[0]), prediction[:, Parameter.joint], '-', color='#296193')
+
+        plt.show()
 
 
 def testSVR():

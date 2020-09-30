@@ -80,23 +80,31 @@ def process_data():
             repetition = torch.cat((repetition, torch.from_numpy(dataset['rerepetition']).float()), 0)
 
     emg = emg[emd::, :].double().to(Parameter.device)
+    print(glove.size())
     glove = glove[time_frame::time_progress, :].to(Parameter.device)  # TODO: evaluate this
 
     if Parameter.split_dataset is True:
         movement = movement[time_frame::time_progress, :].to(Parameter.device)
         repetition = repetition[time_frame::time_progress, :].to(Parameter.device)
 
+    #TODO normalize with data from training and validation set on test set
     if Parameter.normalize_in is True:  # mean 0 std 1
         Parameter.parameter['mean_in'] = torch.mean(emg)
         Parameter.parameter['std_in'] = torch.std(emg)
         scaler.fit(emg.cpu())
         emg = torch.from_numpy(scaler.transform(emg.cpu())).float().to(Parameter.device)
 
+    #TODO normalize with data from training and validation set on test set
     if Parameter.normalize_gt is True:
+        scaler_gt = StandardScaler(copy=True, with_mean=True, with_std=True)
+        print(glove.size())
         Parameter.parameter['mean_gt'] = torch.mean(glove)
         Parameter.parameter['std_gt'] = torch.std(glove)
-        scaler.fit(glove.cpu())
-        glove = torch.from_numpy(scaler.transform(glove.cpu())).float().to(Parameter.device)
+        scaler_gt.fit(glove.cpu())
+        print(scaler_gt.mean_)
+        print(scaler_gt.get_params())
+        Parameter.parameter['scaler_gt'] = scaler_gt
+        glove = torch.from_numpy(scaler_gt.transform(glove.cpu())).float().to(Parameter.device)
 
     ####################################################################################################################
     # calculate feature set
@@ -132,6 +140,7 @@ def process_data():
     if Parameter.network != "CNN" and Parameter.network != "CRNN":  # if CNN leave as [timestep, channel, window length]
         feature_set = feature_set.view(feature_set.shape[0], -1)  # resize to [timestep, channel x feature]
 
+        #TODO normalize with data from training and validation set on test set
         if Parameter.normalize_ft is True:
             Parameter.parameter['mean_ft'] = torch.mean(feature_set)
             Parameter.parameter['std_ft'] = torch.std(feature_set)
