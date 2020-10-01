@@ -14,8 +14,6 @@ def process_data():
     time_progress = time_frame - overlap
     emd = int(Parameter.emd / (1000. / Parameter.emg_frequency))            # number of samples in emd
 
-    scaler = StandardScaler(copy=True, with_mean=True, with_std=True)
-
     emg = torch.Tensor()
     glove = torch.Tensor()
     acc = torch.Tensor()
@@ -89,10 +87,12 @@ def process_data():
 
     #TODO normalize with data from training and validation set on test set
     if Parameter.normalize_in is True:  # mean 0 std 1
+        scaler_in = StandardScaler(copy=True, with_mean=True, with_std=True)
         Parameter.parameter['mean_in'] = torch.mean(emg)
         Parameter.parameter['std_in'] = torch.std(emg)
-        scaler.fit(emg.cpu())
-        emg = torch.from_numpy(scaler.transform(emg.cpu())).float().to(Parameter.device)
+        scaler_in.fit(emg.cpu())
+        Parameter.parameter['scaler_in'] = scaler_in
+        emg = torch.from_numpy(scaler_in.transform(emg.cpu())).float().to(Parameter.device)
 
     #TODO normalize with data from training and validation set on test set
     if Parameter.normalize_gt is True:
@@ -142,10 +142,12 @@ def process_data():
 
         #TODO normalize with data from training and validation set on test set
         if Parameter.normalize_ft is True:
+            scaler_ft = StandardScaler(copy=True, with_mean=True, with_std=True)
             Parameter.parameter['mean_ft'] = torch.mean(feature_set)
             Parameter.parameter['std_ft'] = torch.std(feature_set)
-            scaler.fit(feature_set.cpu())
-            feature_set = torch.from_numpy(scaler.transform(feature_set.cpu())).float().to(Parameter.device)
+            scaler_ft.fit(feature_set.cpu())
+            Parameter.parameter['scaler_ft'] = scaler_ft
+            feature_set = torch.from_numpy(scaler_ft.transform(feature_set.cpu())).float().to(Parameter.device)
     else:
         if Parameter.normalize_ft is True:  # for CNN normalize for each channel
             Parameter.parameter['mean_ft'] = torch.mean(feature_set)

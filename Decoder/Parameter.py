@@ -27,8 +27,8 @@ tensorboard = True          # turn tensorboard logs on or off
 save_predictions = True
 log_training_pred = False   # Decide whether to log predictions of training and validation set during training process
 
-load_input = True          # load previously generated features
-train = False                # train network
+load_input = False          # load previously generated features
+train = True                # train network
 test = True                 # test network
 database = '7'              # [1, 2, 7, 8, Myo, cross-subject8]
 subject = 2
